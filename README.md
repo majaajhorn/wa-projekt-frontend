@@ -11,6 +11,8 @@ My profile srediti:
 - driving licence (dropdown)
 - live-in experience (dropdown)
 - general care experience (dropdown)
+- profile picture (saveat možda kao string u bazu?)
+- napraviti gumb: edit profile koji će nuditi sve opcije navedene gore
 
 Ovo sve mora korisnik MORATI unijeti u svoj profil. To se sve mora spremati u bazu pod tim korisnikom (određenim), svaki korisnik ima svoje podatke.
 
