@@ -1,11 +1,34 @@
 <template>
   <div>
     <h1>My Profile</h1>
-    <p v-if="errorMessage">{{ errorMessage }}</p>
-    <p v-else-if="user.fullName">{{ user.fullName }}</p>
-    <img v-if="user.profilePicture" :src="user.profilePicture" alt="Profile Picture" />
-    <p v-else>Loading...</p>
 
+    <!-- Display Error Messages -->
+    <p v-if="errorMessage">{{ errorMessage }}</p>
+
+    <!-- Display User Info -->
+    <div v-if="user">
+      <p><strong>Name:</strong> {{ user.fullName }}</p>
+      <p><strong>Email:</strong> <span>{{ user.email }}</span></p>
+
+      <button @click="editEmail = !editEmail">Change Email</button>
+      <button @click="editPassword = !editPassword">Change Password</button>
+
+      <!-- Edit Email Form -->
+      <div v-if="editEmail">
+        <input v-model="updatedEmail" type="email" placeholder="Enter new email" />
+        <button @click="updateEmail">Save Email</button>
+      </div>
+
+      <!-- Edit Password Form -->
+      <div v-if="editPassword">
+        <input v-model="currentPassword" type="password" placeholder="Current password" />
+        <input v-model="newPassword" type="password" placeholder="New password" />
+        <button @click="updatePassword">Save Password</button>
+      </div>
+    </div>
+
+    <!-- Profile Picture -->
+    <img v-if="user.profilePicture" :src="user.profilePicture" alt="Profile Picture" />
     <form @submit.prevent="uploadProfilePicture">
       <label for="profilePicture">Upload Profile Picture:</label>
       <input type="file" id="profilePicture" ref="fileInput" />
@@ -25,10 +48,15 @@ export default {
   name: 'MyProfile',
   setup() {
     const user = ref({});
+    const updatedEmail = ref('');
+    const currentPassword = ref('');
+    const newPassword = ref('');
     const errorMessage = ref('');
     const fileInput = ref(null);
     const token = localStorage.getItem('token');
     const router = useRouter();
+    const editEmail = ref(false);
+    const editPassword = ref(false);
 
     const goBack = () => {
       router.back(); // Navigate back to the previous route
@@ -46,11 +74,55 @@ export default {
         const response = await apiClient.get('/auth/profile');
         console.log('Profile fetched successfully:', response.data);
         user.value = response.data; // Update user profile with the response
+        updatedEmail.value = response.data.email;
       } catch (error) {
         console.error('Error fetching user profile:', error);
         errorMessage.value = 'Error fetching profile, please try again later.';
       }
     });
+
+    // Function to update email
+    const updateEmail = async () => {
+      try {
+        const payload = {
+          email: updatedEmail.value,
+        };
+
+        const response = await apiClient.put('/auth/update-profile', payload);
+        alert('Email updated successfully!');
+        console.log(response.data);
+        user.value.email = updatedEmail.value; // Update email in the UI
+        editEmail.value = false; // Hide email input field after save
+      } catch (error) {
+        console.error('Error updating email:', error);
+        alert('Error updating email. Please try again.');
+      }
+    };
+
+    // Function to update password
+    const updatePassword = async () => {
+      if (!currentPassword.value || !newPassword.value) {
+        alert('Please fill in both the current and new password fields.');
+        return;
+      }
+
+      try {
+        const payload = {
+          currentPassword: currentPassword.value,
+          newPassword: newPassword.value,
+        };
+
+        const response = await apiClient.put('/auth/update-profile', payload);
+        alert('Password updated successfully!');
+        console.log(response.data);
+        currentPassword.value = ''; // Clear password fields
+        newPassword.value = '';
+        editPassword.value = false; // Hide password input fields after save
+      } catch (error) {
+        console.error('Error updating password:', error);
+        alert('Error updating password. Please try again.');
+      }
+    };
 
     // Upload profile picture
     const uploadProfilePicture = async () => {
@@ -80,9 +152,16 @@ export default {
 
     return {
       user,
+      updatedEmail,
+      currentPassword,
+      newPassword,
       goBack,
       errorMessage,
       fileInput,
+      editEmail,
+      editPassword,
+      updateEmail,
+      updatePassword,
       uploadProfilePicture,
     };
   },
@@ -110,5 +189,11 @@ img {
   border-radius: 50%;
   margin-bottom: 20px;
   object-fit: cover;
+}
+
+input {
+  margin: 10px 0;
+  padding: 5px;
+  width: 200px;
 }
 </style>
