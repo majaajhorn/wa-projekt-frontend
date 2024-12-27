@@ -16,3 +16,5 @@ My profile srediti:
 
 Ovo sve mora korisnik MORATI unijeti u svoj profil. To se sve mora spremati u bazu pod tim korisnikom (određenim), svaki korisnik ima svoje podatke.
 
+LOGIN
+- forgot password option (možda da mu se reset posalje na email?)
