@@ -2,10 +2,16 @@
   <div>
     <h1>My Profile</h1>
     <p v-if="errorMessage">{{ errorMessage }}</p>
-      <!-- Display user data if available -->
-      <p v-else-if="user.fullName">Welcome, {{ user.fullName }}</p>
-    <!-- Fallback message if no data is loaded yet -->
+    <p v-else-if="user.fullName">{{ user.fullName }}</p>
+    <img v-if="user.profilePicture" :src="user.profilePicture" alt="Profile Picture" />
     <p v-else>Loading...</p>
+
+    <form @submit.prevent="uploadProfilePicture">
+      <label for="profilePicture">Upload Profile Picture:</label>
+      <input type="file" id="profilePicture" ref="fileInput" />
+      <button type="submit">Upload</button>
+    </form>
+
     <button @click="goBack">Go Back</button>
   </div>
 </template>
@@ -20,7 +26,7 @@ export default {
   setup() {
     const user = ref({});
     const errorMessage = ref('');
-    //const fullName = ref('');
+    const fileInput = ref(null);
     const token = localStorage.getItem('token');
     const router = useRouter();
 
@@ -32,6 +38,7 @@ export default {
     onMounted(async () => {
       if (!token) {
         alert('You must be logged in to view this page.');
+        router.push('/login'); // Redirect to login if no token
         return;
       }
 
@@ -45,10 +52,38 @@ export default {
       }
     });
 
+    // Upload profile picture
+    const uploadProfilePicture = async () => {
+      const file = fileInput.value?.files[0];
+      if (!file) {
+        alert('Please select a file to upload.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('profilePicture', file);
+
+      try {
+        const response = await apiClient.post('/auth/upload-profile-picture', formData, {
+          headers: { 
+            'Authorization': `Bearer ${token}`, // Corrected template literal for Bearer token
+            'Content-Type': 'multipart/form-data', // Ensure correct content type
+          },
+        });
+        user.value.profilePicture = response.data.profilePictureUrl; // Update picture in the UI
+        alert('Profile picture uploaded successfully!');
+      } catch (error) {
+        console.error('Error uploading profile picture:', error);
+        alert('Error uploading profile picture. Please try again.');
+      }
+    };
+
     return {
       user,
       goBack,
       errorMessage,
+      fileInput,
+      uploadProfilePicture,
     };
   },
 };
@@ -67,5 +102,13 @@ button {
 
 button:hover {
   background-color: #45a049;
+}
+
+img {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  margin-bottom: 20px;
+  object-fit: cover;
 }
 </style>
