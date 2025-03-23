@@ -26,9 +26,9 @@
 
   ### Post a job ###
   - ~~title, salary, employment type, (fulltime/parttime), location, job description~~
-  - checkboxes ne rade, popraviti
   - ~~apply button (save)~~
   - kad se sejva, prikazuje se na jobsearch kartici automatski --> ne radi, popraviti
+  - gumb "view applications", "edit", to omogućiti da radi
 
 ## REGISTER ##
 
