@@ -21,6 +21,14 @@
 ## LOGIN ## 
 - forgot password option (možda da mu se reset posalje na email?)
 
+## MY PROFILE AS AN EMPLOYER ##
+- ~~full name, email, location, gender~~
+
+  ### Post a job ###
+  - title, salary, employment type, (fulltime/parttime), location, job description
+  - apply button (save)
+  - kad se sejva, prikazuje se na jobsearch kartici automatski
+
 ## REGISTER ##
 
 ## navbar ##
