@@ -31,7 +31,8 @@
 
     <!-- Complete Profile Section -->
     <div v-if="!user.profileCompleted" class="complete-profile-alert">
-      <p>Please complete your profile to increase your chances of getting hired!</p>
+      <p v-if="user.role === 'jobseeker'">Please complete your profile to increase your chances of getting hired!</p>
+      <p v-else-if="user.role === 'employer'">Please complete your employer profile to start posting jobs!</p>
       <button @click="editProfile = !editProfile" class="primary-btn">Complete Profile</button>
     </div>
 
@@ -39,6 +40,7 @@
     <div v-if="editProfile" class="profile-form-container">
       <h3 class="section-title">Complete your profile</h3>
       <form @submit.prevent="saveProfile" class="profile-form">
+        <!-- Common fields for both jobseeker and employer -->
         <div class="form-group">
           <label for="gender">Gender</label>
           <div class="custom-select">
@@ -55,76 +57,90 @@
           <input v-model="profileData.location" id="location" type="text" placeholder="Enter your location" class="text-input" />
         </div>
 
-        <div class="form-group">
-          <label for="englishLevel">English Language Level</label>
-          <div class="custom-select">
-            <select v-model="profileData.englishLevel" id="englishLevel">
-              <option value="very_basic">Very Basic</option>
-              <option value="conversational">Conversational</option>
-              <option value="fluent">Fluent</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Care Qualification (select all that apply)</label>
-          <div class="modern-checkbox-group">
-            <div v-for="option in qualificationOptions" :key="option.value" class="modern-checkbox">
-              <input 
-                type="checkbox" 
-                :id="'qualification-' + option.value" 
-                :value="option.value" 
-                v-model="profileData.qualification" 
-              />
-              <label :for="'qualification-' + option.value">
-                <span class="checkbox-custom"></span>
-                {{ option.label }}
-              </label>
+        <!-- Fields only for jobseeker -->
+        <template v-if="user.role === 'jobseeker'">
+          <div class="form-group">
+            <label for="englishLevel">English Language Level</label>
+            <div class="custom-select">
+              <select v-model="profileData.englishLevel" id="englishLevel">
+                <option value="very_basic">Very Basic</option>
+                <option value="conversational">Conversational</option>
+                <option value="fluent">Fluent</option>
+              </select>
             </div>
           </div>
-        </div>
 
-        <div class="form-group">
-          <label>General Care Experience (select all that apply)</label>
-          <div class="modern-checkbox-group">
-            <div v-for="option in careExperienceOptions" :key="option.value" class="modern-checkbox">
-              <input 
-                type="checkbox" 
-                :id="'careExperience-' + option.value" 
-                :value="option.value" 
-                v-model="profileData.careExperience" 
-              />
-              <label :for="'careExperience-' + option.value">
-                <span class="checkbox-custom"></span>
-                {{ option.label }}
-              </label>
+          <div class="form-group">
+            <label>Care Qualification (select all that apply)</label>
+            <div class="modern-checkbox-group">
+              <div v-for="option in qualificationOptions" :key="option.value" class="modern-checkbox">
+                <input 
+                  type="checkbox" 
+                  :id="'qualification-' + option.value" 
+                  :value="option.value" 
+                  v-model="profileData.qualification" 
+                />
+                <label :for="'qualification-' + option.value">
+                  <span class="checkbox-custom"></span>
+                  {{ option.label }}
+                </label>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="form-group">
-          <label for="liveInExperience">Live-in Experience</label>
-          <div class="custom-select">
-            <select v-model="profileData.liveInExperience" id="liveInExperience">
-              <option value="less_than_a_year">Less than a Year</option>
-              <option value="1_to_3_years">1-3 Years</option>
-              <option value="4_to_6_years">4-6 Years</option>
-              <option value="more_than_6_years">More than 6 Years</option>
-            </select>
+          <div class="form-group">
+            <label>General Care Experience (select all that apply)</label>
+            <div class="modern-checkbox-group">
+              <div v-for="option in careExperienceOptions" :key="option.value" class="modern-checkbox">
+                <input 
+                  type="checkbox" 
+                  :id="'careExperience-' + option.value" 
+                  :value="option.value" 
+                  v-model="profileData.careExperience" 
+                />
+                <label :for="'careExperience-' + option.value">
+                  <span class="checkbox-custom"></span>
+                  {{ option.label }}
+                </label>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div class="form-group">
-          <label for="drivingLicence">Driving Licence</label>
-          <div class="custom-select">
-            <select v-model="profileData.drivingLicence" id="drivingLicence">
-              <option value="yes">Yes</option>
-              <option value="no">No</option>
-            </select>
+          <div class="form-group">
+            <label for="liveInExperience">Live-in Experience</label>
+            <div class="custom-select">
+              <select v-model="profileData.liveInExperience" id="liveInExperience">
+                <option value="less_than_a_year">Less than a Year</option>
+                <option value="1_to_3_years">1-3 Years</option>
+                <option value="4_to_6_years">4-6 Years</option>
+                <option value="more_than_6_years">More than 6 Years</option>
+              </select>
+            </div>
           </div>
-        </div>
 
-        <button type="submit" class="primary-btn">Save Profile</button>
+          <div class="form-group">
+            <label for="drivingLicence">Driving Licence</label>
+            <div class="custom-select">
+              <select v-model="profileData.drivingLicence" id="drivingLicence">
+                <option value="yes">Yes</option>
+                <option value="no">No</option>
+              </select>
+            </div>
+          </div>
+        </template>
+        
+        <!-- Fields only for employer could be added here -->
+        <template v-if="user.role === 'employer'">
+          <div class="form-group">
+            <label for="companyName">Company Name</label>
+            <input v-model="profileData.companyName" id="companyName" type="text" placeholder="Enter your company name" class="text-input" />
+          </div>
+        </template>
+
+        <div class="form-actions">
+          <button type="button" @click="editProfile = false" class="cancel-btn">Cancel</button>
+          <button type="submit" class="primary-btn">Save Profile</button>
+        </div>
       </form>
     </div>
 
@@ -153,7 +169,15 @@
     <div v-if="user && !editProfile" class="profile-info">
       <h3 class="section-title">Profile Information</h3>
       
+      <!-- New Edit Profile Button -->
+      <div class="edit-profile-btn-container">
+        <button @click="handleEditProfile" class="edit-profile-btn">
+          <span>Edit Profile</span>
+        </button>
+      </div>
+      
       <div class="info-grid">
+        <!-- Common fields for both employer and jobseeker -->
         <div class="info-item">
           <span class="info-label">Full Name</span>
           <span class="info-value">{{ user.fullName }}</span>
@@ -174,40 +198,51 @@
           <span class="info-value">{{ formatString(user.profileData?.location) }}</span>
         </div>
         
-        <div class="info-item">
-          <span class="info-label">English Level</span>
-          <span class="info-value">{{ formatString(user.profileData?.englishLevel) }}</span>
-        </div>
-        
-        <div class="info-item full-width">
-          <span class="info-label">Qualifications</span>
-          <div v-if="user.profileData?.qualification && user.profileData.qualification.length > 0" class="tags-container">
-            <span v-for="(qual, index) in user.profileData.qualification" :key="index" class="tag">
-              {{ formatString(qual) }}
-            </span>
+        <!-- Fields only for employer -->
+        <template v-if="user.role === 'employer' && user.profileData?.companyName">
+          <div class="info-item">
+            <span class="info-label">Company Name</span>
+            <span class="info-value">{{ user.profileData.companyName }}</span>
           </div>
-          <span v-else class="info-value empty">None specified</span>
-        </div>
+        </template>
         
-        <div class="info-item full-width">
-          <span class="info-label">Care Experience</span>
-          <div v-if="user.profileData?.careExperience && user.profileData.careExperience.length > 0" class="tags-container">
-            <span v-for="(exp, index) in user.profileData.careExperience" :key="index" class="tag">
-              {{ formatString(exp) }}
-            </span>
+        <!-- Fields only for jobseeker -->
+        <template v-if="user.role === 'jobseeker'">
+          <div class="info-item">
+            <span class="info-label">English Level</span>
+            <span class="info-value">{{ formatString(user.profileData?.englishLevel) }}</span>
           </div>
-          <span v-else class="info-value empty">None specified</span>
-        </div>
-        
-        <div class="info-item">
-          <span class="info-label">Live-in Experience</span>
-          <span class="info-value">{{ formatString(user.profileData?.liveInExperience) }}</span>
-        </div>
-        
-        <div class="info-item">
-          <span class="info-label">Driving Licence</span>
-          <span class="info-value">{{ formatString(user.profileData?.drivingLicence) }}</span>
-        </div>
+          
+          <div class="info-item full-width">
+            <span class="info-label">Qualifications</span>
+            <div v-if="user.profileData?.qualification && user.profileData.qualification.length > 0" class="tags-container">
+              <span v-for="(qual, index) in user.profileData.qualification" :key="index" class="tag">
+                {{ formatString(qual) }}
+              </span>
+            </div>
+            <span v-else class="info-value empty">None specified</span>
+          </div>
+          
+          <div class="info-item full-width">
+            <span class="info-label">Care Experience</span>
+            <div v-if="user.profileData?.careExperience && user.profileData.careExperience.length > 0" class="tags-container">
+              <span v-for="(exp, index) in user.profileData.careExperience" :key="index" class="tag">
+                {{ formatString(exp) }}
+              </span>
+            </div>
+            <span v-else class="info-value empty">None specified</span>
+          </div>
+          
+          <div class="info-item">
+            <span class="info-label">Live-in Experience</span>
+            <span class="info-value">{{ formatString(user.profileData?.liveInExperience) }}</span>
+          </div>
+          
+          <div class="info-item">
+            <span class="info-label">Driving Licence</span>
+            <span class="info-value">{{ formatString(user.profileData?.drivingLicence) }}</span>
+          </div>
+        </template>
       </div>
     </div>
 
@@ -286,6 +321,71 @@ export default {
     const formatString = (str) => {
       if (!str) return '';
       return str.replace(/_/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+    };
+
+    // Handle the Edit Profile button click
+    const handleEditProfile = () => {
+      // Initialize profile data based on role
+      if (user.value.profileData) {
+        // Common fields for both roles
+        profileData.value = {
+          ...user.value.profileData,
+          gender: user.value.profileData.gender || '',
+          location: user.value.profileData.location || '',
+        };
+        
+        // Fields specific to jobseeker
+        if (user.value.role === 'jobseeker') {
+          profileData.value = {
+            ...profileData.value,
+            englishLevel: user.value.profileData.englishLevel || '',
+            // Ensure qualification is an array
+            qualification: Array.isArray(user.value.profileData.qualification) 
+              ? [...user.value.profileData.qualification] 
+              : user.value.profileData.qualification ? [user.value.profileData.qualification] : [],
+            // Ensure careExperience is an array
+            careExperience: Array.isArray(user.value.profileData.careExperience) 
+              ? [...user.value.profileData.careExperience] 
+              : user.value.profileData.careExperience ? [user.value.profileData.careExperience] : [],
+            liveInExperience: user.value.profileData.liveInExperience || '',
+            drivingLicence: user.value.profileData.drivingLicence || ''
+          };
+        }
+        
+        // Fields specific to employer
+        if (user.value.role === 'employer') {
+          profileData.value = {
+            ...profileData.value,
+            companyName: user.value.profileData.companyName || ''
+          };
+        }
+      } else {
+        // Initialize empty profile data if none exists
+        profileData.value = {
+          gender: '',
+          location: ''
+        };
+        
+        // Add role-specific empty fields
+        if (user.value.role === 'jobseeker') {
+          profileData.value = {
+            ...profileData.value,
+            englishLevel: '',
+            qualification: [],
+            careExperience: [],
+            liveInExperience: '',
+            drivingLicence: ''
+          };
+        } else if (user.value.role === 'employer') {
+          profileData.value = {
+            ...profileData.value,
+            companyName: ''
+          };
+        }
+      }
+      
+      // Toggle edit mode
+      editProfile.value = true;
     };
 
     // Fetch user profile when the component is mounted
@@ -367,12 +467,21 @@ export default {
     };
 
     const saveProfile = async () => {
-      // Validate the profile data - most fields are required
-      if (!profileData.value.gender || !profileData.value.location || !profileData.value.englishLevel || 
-          profileData.value.qualification.length === 0 || profileData.value.careExperience.length === 0 || 
-          !profileData.value.liveInExperience || !profileData.value.drivingLicence) {
-        alert('Please fill in all fields before saving.');
-        return;
+      // Different validation based on user role
+      if (user.value.role === 'jobseeker') {
+        // Validate jobseeker profile data - all fields are required
+        if (!profileData.value.gender || !profileData.value.location || !profileData.value.englishLevel || 
+            profileData.value.qualification.length === 0 || profileData.value.careExperience.length === 0 || 
+            !profileData.value.liveInExperience || !profileData.value.drivingLicence) {
+          alert('Please fill in all fields before saving.');
+          return;
+        }
+      } else if (user.value.role === 'employer') {
+        // Validate employer profile data - only basic fields required
+        if (!profileData.value.gender || !profileData.value.location || !profileData.value.companyName) {
+          alert('Please fill in all fields before saving.');
+          return;
+        }
       }
 
       try {
@@ -439,6 +548,7 @@ export default {
       goBack,
       formatString,
       getInitials,
+      handleEditProfile, // Expose the new method
     };
   },
 };
@@ -447,7 +557,7 @@ export default {
 <style scoped>
 /* Base styles */
 .profile-container {
-  max-width: 800px;
+  max-width: 500px;
   margin: 0 auto;
   padding: 20px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
@@ -572,6 +682,31 @@ export default {
 .action-btn:hover {
   background-color: #e9ecef;
   border-color: #ccc;
+}
+
+/* New Edit Profile Button */
+.edit-profile-btn-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.edit-profile-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.edit-profile-btn:hover {
+  background-color: #45a049;
 }
 
 /* Complete profile alert */
@@ -784,6 +919,15 @@ export default {
   color: #343a40;
 }
 
+/* Form actions */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 15px;
+  grid-column: span 2;
+}
+
 /* Modal forms */
 .modal-form {
   background-color: #f9f9f9;
@@ -797,13 +941,6 @@ export default {
 
 .modal-form .text-input {
   margin-bottom: 15px;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 15px;
 }
 
 /* Profile info display */

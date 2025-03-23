@@ -15,8 +15,11 @@ const login = async () => {
     const response = await loginUser({ email: email.value, password: password.value, role: role.value });
     message.value = response.data.message;
 
-    // Save the token to localStorage for future API requests
+    // Save the token and user role to localStorage for future API requests
     localStorage.setItem('token', response.data.token);
+    localStorage.setItem('userRole', role.value); // This was missing! Store the role
+
+    console.log('Login successful. Role stored:', role.value); // Add debugging
 
     // Redirect user to the appropriate dashboard based on the role
     if (role.value === 'jobseeker') {
@@ -27,6 +30,7 @@ const login = async () => {
   } catch (error) {
     // Display an error message if the login fails
     message.value = error.response?.data?.message || 'An error occurred.';
+    console.error('Login error:', error);
   }
 };
 </script>

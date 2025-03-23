@@ -4,6 +4,9 @@ import RegisterForm from '../components/RegisterForm.vue';
 import Home from '../components/Home.vue';
 import JobseekerDashboard from '../components/JobseekerDashboard.vue';
 import MyProfile from '../components/MyProfile.vue';
+import JobSearch from '../components/JobSearch.vue'; 
+import EmployerDashboard from '../components/EmployerDashboard.vue';
+import JobPost from '../components/JobPost.vue';
 
 const routes = [
   { path: '/', component: Home },
@@ -11,6 +14,10 @@ const routes = [
   { path: '/register', component: RegisterForm },
   { path: '/jobseeker-dashboard', component: JobseekerDashboard, meta: { requiresAuth: true } }, // Fixed syntax
   { path: '/my-profile', component: MyProfile, meta: { requiresAuth: true } }, // Fixed syntax
+  { path: '/job-search', component: JobSearch, meta: { requiresAuth: true } },
+  { path: '/employer-dashboard', component: EmployerDashboard, meta: { requiresAuth: true } },
+  { path: '/post-job', component: JobPost, meta: { requiresAuth: true, employerOnly: true } },
+
 ];
 
 const router = createRouter({
@@ -21,17 +28,22 @@ const router = createRouter({
 // Global route guard to protect authenticated routes
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token'); // Get token from localStorage
+  const userRole = localStorage.getItem('userRole'); // Get user role from localStorage
 
   // If the route requires auth and there's no token, redirect to home
   if (to.meta.requiresAuth && !token) {
     next('/'); // Redirect to home (login page)
-  } else {
+  } 
+  // If the route is for employers only and user is not an employer, redirect to dashboard
+  else if (to.meta.employerOnly && userRole !== 'employer') {
+    next('/jobseeker-dashboard'); // Redirect to appropriate dashboard
+  }
+  else {
     next(); // Proceed to the route
   }
 });
 
 export default router;
-
 
   /* Explanation
 meta.requiresAuth:

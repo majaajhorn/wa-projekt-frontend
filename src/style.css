@@ -2,10 +2,10 @@
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  
+  /* Removed color-scheme: light dark to prevent automatic dark mode */
+  color: #333333; /* Default text color set to dark */
+  background-color: #ffffff; /* Default background color set to white */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -15,65 +15,70 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: #4CAF50; /* Changed to match your green theme */
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  color: #45a049; /* Darker green on hover */
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
+  /* Removed display: flex and place-items: center which was forcing content to center */
   min-width: 320px;
   min-height: 100vh;
 }
 
 h1 {
-  font-size: 3.2em;
+  font-size: 2.5em; /* Reduced from 3.2em */
   line-height: 1.1;
+  color: #2c3e50; /* Matching your profile title color */
 }
 
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
+  border-radius: 25px; /* Changed from 8px to match your rounded buttons */
+  border: 1px solid #ddd;
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #f8f9fa; /* Light background for buttons */
+  color: #333; /* Text color for buttons */
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: all 0.3s ease;
 }
 button:hover {
-  border-color: #646cff;
+  background-color: #e9ecef;
+  border-color: #ccc;
 }
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: 3px solid rgba(76, 175, 80, 0.2); /* Green outline matching your theme */
+}
+
+/* Primary button style */
+button.primary-btn {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+}
+
+button.primary-btn:hover {
+  background-color: #45a049;
 }
 
 .card {
   padding: 2em;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 #app {
-  max-width: 1280px;
+  width: 100%;
   margin: 0 auto;
   padding: 2rem;
-  text-align: center;
+  /* Removed text-align: center which was centering all text */
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-}
+/* Removed media query for dark mode preference */
