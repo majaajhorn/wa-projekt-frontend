@@ -20,3 +20,14 @@
 
 ## LOGIN ## 
 - forgot password option (možda da mu se reset posalje na email?)
+
+## REGISTER ##
+
+## navbar ##
+- napraviti navbar (home (logo), my profile, job search, about, sign out) - ovo će svugdje biti isto
+
+## JOB SEARCH ##
+- search bar, filter option
+- filter opcije: spol, iskustvo, razina engleskog jezika, vozačka dozvola(bool), lokacija, general experience, qualifications
+- kad se klikne na rezultat pretraživanja -> vodi na novu componentu (posao)
+- izbaci ponude posla kao kartice (naziv, opis kratki) i onda da se klikne na to vodi se na novu componentu
