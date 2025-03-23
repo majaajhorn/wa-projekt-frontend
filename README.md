@@ -25,9 +25,10 @@
 - ~~full name, email, location, gender~~
 
   ### Post a job ###
-  - title, salary, employment type, (fulltime/parttime), location, job description
-  - apply button (save)
-  - kad se sejva, prikazuje se na jobsearch kartici automatski
+  - ~~title, salary, employment type, (fulltime/parttime), location, job description~~
+  - checkboxes ne rade, popraviti
+  - ~~apply button (save)~~
+  - kad se sejva, prikazuje se na jobsearch kartici automatski --> ne radi, popraviti
 
 ## REGISTER ##
 
