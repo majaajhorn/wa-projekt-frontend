@@ -7,17 +7,34 @@ import MyProfile from '../components/MyProfile.vue';
 import JobSearch from '../components/JobSearch.vue'; 
 import EmployerDashboard from '../components/EmployerDashboard.vue';
 import JobPost from '../components/JobPost.vue';
+import JobApplications from '../components/JobApplications.vue';
+import EditJob from '../components/EditJob.vue';
+import JobDetails from '../components/JobDetails.vue';
 
 const routes = [
   { path: '/', component: Home },
   { path: '/login', component: LoginForm },
   { path: '/register', component: RegisterForm },
-  { path: '/jobseeker-dashboard', component: JobseekerDashboard, meta: { requiresAuth: true } }, // Fixed syntax
-  { path: '/my-profile', component: MyProfile, meta: { requiresAuth: true } }, // Fixed syntax
+  { path: '/jobseeker-dashboard', component: JobseekerDashboard, meta: { requiresAuth: true } },
+  { path: '/my-profile', component: MyProfile, meta: { requiresAuth: true } },
   { path: '/job-search', component: JobSearch, meta: { requiresAuth: true } },
   { path: '/employer-dashboard', component: EmployerDashboard, meta: { requiresAuth: true } },
   { path: '/post-job', component: JobPost, meta: { requiresAuth: true, employerOnly: true } },
-
+  { 
+    path: '/job-applications/:id', 
+    component: JobApplications, 
+    meta: { requiresAuth: true, employerOnly: true } 
+  },
+  { 
+    path: '/edit-job/:id', 
+    component: EditJob, 
+    meta: { requiresAuth: true, employerOnly: true } 
+  },
+  { 
+    path: '/job-details/:id', 
+    component: JobDetails, 
+    meta: { requiresAuth: true, employerOnly: true } 
+  }
 ];
 
 const router = createRouter({
@@ -44,17 +61,3 @@ router.beforeEach((to, from, next) => {
 });
 
 export default router;
-
-  /* Explanation
-meta.requiresAuth:
-
-In the /jobseeker-dashboard route, the meta property is used to mark the route as requiring authentication.
-This makes it easy to identify which routes should be protected.
-beforeEach Route Guard:
-
-The router.beforeEach hook runs before navigating to any route.
-It checks if the target route (to) has meta.requiresAuth set to true and whether the user has a valid token in localStorage.
-If the token is missing (i.e., the user is not logged in), the guard redirects them to the home page (/).
-Preventing Back Navigation:
-
-After logging out, when the token is removed from localStorage, any attempt to access protected routes (even via the browser back button) will fail because the guard will redirect unauthenticated users to the home page.*/ 
