@@ -1,26 +1,41 @@
+<template>
+  <AppLayout>
+    <router-view />
+  </AppLayout>
+</template>
+
 <script>
+import AppLayout from './components/AppLayout.vue';
+
 export default {
   name: 'App',
+  components: {
+    AppLayout
+  }
 };
 </script>
 
-<template>
-  <div id="app">
-    <router-view></router-view> <!-- This is where the route's component will be rendered -->
-  </div>
-</template>
+<style>
+/* Global styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: #f9fafb;
+  color: #333;
+  line-height: 1.6;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+
+a {
+  text-decoration: none;
+  color: inherit;
 }
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+
+button {
+  cursor: pointer;
 }
 </style>
