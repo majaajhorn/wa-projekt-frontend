@@ -28,12 +28,12 @@
   - ~~title, salary, employment type, (fulltime/parttime), location, job description~~
   - ~~apply button (save)~~
   - kad se sejva, prikazuje se na jobsearch kartici automatski --> ne radi, popraviti
-  - gumb "view applications", "edit", to omogućiti da radi
+  - ~~gumb "view applications", "edit", to omogućiti da radi~~
 
 ## REGISTER ##
 
 ## navbar ##
-- napraviti navbar (home (logo), my profile, job search, about, sign out) - ovo će svugdje biti isto
+- napraviti navbar (home (logo), my profile, job search (ili ako je employer "browse carers", about, sign out) - ovo će svugdje biti isto
 
 ## JOB SEARCH ##
 - search bar, filter option
