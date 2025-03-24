@@ -136,7 +136,7 @@ export default {
     const filterStatus = ref('all');
     const activeJobsCount = ref(0);
     const totalApplications = ref(0);
-    const unreadMessages = ref(0);
+    const unreadMessages = ref(0); // Set to 0 by default instead of random
     const showDeleteModal = ref(false);
     const jobToDelete = ref(null);
 
@@ -163,8 +163,8 @@ export default {
         totalApplications.value = jobs.value.reduce((total, job) => 
           total + (job.applications ? job.applications.length : 0), 0);
         
-        // For demo purposes, set a random number of unread messages
-        unreadMessages.value = Math.floor(Math.random() * 5);
+        // Messages count is now fixed at 0 until messaging is implemented
+        // unreadMessages.value = 0; // Already set to 0 on initialization
         
         loading.value = false;
       } catch (error) {
