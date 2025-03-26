@@ -10,6 +10,7 @@ import JobPost from '../components/JobPost.vue';
 import JobApplications from '../components/JobApplications.vue';
 import EditJob from '../components/EditJob.vue';
 import JobDetails from '../components/JobDetails.vue';
+import About from '../components/About.vue'; // Import the About component
 
 const routes = [
   { path: '/', component: Home },
@@ -33,8 +34,9 @@ const routes = [
   { 
     path: '/job-details/:id', 
     component: JobDetails, 
-    meta: { requiresAuth: true, employerOnly: true } 
-  }
+    meta: { requiresAuth: true } 
+  },
+  { path: '/about', component: About } // Added About route - no auth required
 ];
 
 const router = createRouter({
