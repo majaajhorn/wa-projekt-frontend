@@ -11,6 +11,7 @@ import JobApplications from '../components/JobApplications.vue';
 import EditJob from '../components/EditJob.vue';
 import JobDetails from '../components/JobDetails.vue';
 import About from '../components/About.vue'; // Import the About component
+import BrowseCarers from '../components/BrowseCarers.vue';
 
 const routes = [
   { path: '/', component: Home },
@@ -21,22 +22,11 @@ const routes = [
   { path: '/job-search', component: JobSearch, meta: { requiresAuth: true } },
   { path: '/employer-dashboard', component: EmployerDashboard, meta: { requiresAuth: true } },
   { path: '/post-job', component: JobPost, meta: { requiresAuth: true, employerOnly: true } },
-  { 
-    path: '/job-applications/:id', 
-    component: JobApplications, 
-    meta: { requiresAuth: true, employerOnly: true } 
-  },
-  { 
-    path: '/edit-job/:id', 
-    component: EditJob, 
-    meta: { requiresAuth: true, employerOnly: true } 
-  },
-  { 
-    path: '/job-details/:id', 
-    component: JobDetails, 
-    meta: { requiresAuth: true } 
-  },
-  { path: '/about', component: About } // Added About route - no auth required
+  { path: '/job-applications/:id', component: JobApplications, meta: { requiresAuth: true, employerOnly: true } },
+  { path: '/edit-job/:id', component: EditJob, meta: { requiresAuth: true, employerOnly: true } },
+  { path: '/job-details/:id', component: JobDetails, meta: { requiresAuth: true } },
+  { path: '/about', component: About }, // Added About route - no auth required
+  { path: '/browse-carers', component: BrowseCarers, meta: { requiresAuth: true, employerOnly: true } },
 ];
 
 const router = createRouter({
