@@ -163,7 +163,8 @@
           <div v-for="carer in filteredCarers" :key="carer._id" class="carer-card">
             <div class="carer-card-content">
               <div class="carer-info-section">
-                
+                <h3 class="carer-name">{{ carer.fullName }}</h3>
+
                 <!-- Display actual care skills as tags -->
                 <div class="carer-skills">
                   <span v-if="hasExperience(carer, 'brain_injury')" class="skill-tag">Brain Injury</span>
@@ -915,6 +916,18 @@ export default {
 .carer-info-section {
   flex: 1;
   padding-right: 15px;
+}
+
+.carer-name {
+  margin: 0 0 15px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  /* Add a bit of ellipsis handling for long names */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .carer-header {
