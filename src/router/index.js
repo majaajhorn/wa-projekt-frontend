@@ -10,7 +10,7 @@ import JobPost from '../components/JobPost.vue';
 import JobApplications from '../components/JobApplications.vue';
 import EditJob from '../components/EditJob.vue';
 import JobDetails from '../components/JobDetails.vue';
-import About from '../components/About.vue'; // Import the About component
+import About from '../components/About.vue';
 import BrowseCarers from '../components/BrowseCarers.vue';
 
 const routes = [
@@ -25,8 +25,16 @@ const routes = [
   { path: '/job-applications/:id', component: JobApplications, meta: { requiresAuth: true, employerOnly: true } },
   { path: '/edit-job/:id', component: EditJob, meta: { requiresAuth: true, employerOnly: true } },
   { path: '/job-details/:id', component: JobDetails, meta: { requiresAuth: true } },
-  { path: '/about', component: About }, // Added About route - no auth required
-  { path: '/browse-carers', component: BrowseCarers, meta: { requiresAuth: true, employerOnly: true } },
+  { path: '/about', component: About }, // No auth required
+  
+  // Modified BrowseCarers route to handle both public and authenticated access
+  { 
+    path: '/browse-carers', 
+    component: BrowseCarers, 
+    meta: { 
+      requiresAuthForEmployers: true // Custom flag for our route guard
+    } 
+  },
 ];
 
 const router = createRouter({
@@ -39,9 +47,24 @@ router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token'); // Get token from localStorage
   const userRole = localStorage.getItem('userRole'); // Get user role from localStorage
 
-  // If the route requires auth and there's no token, redirect to home
-  if (to.meta.requiresAuth && !token) {
-    next('/'); // Redirect to home (login page)
+  // Handle browse-carers route specially
+  if (to.path === '/browse-carers') {
+    // If not logged in, allow access (public preview)
+    if (!token) {
+      next();
+    } 
+    // If logged in as employer, allow access
+    else if (userRole === 'employer') {
+      next();
+    }
+    // If logged in as jobseeker, redirect to dashboard
+    else {
+      next('/jobseeker-dashboard');
+    }
+  }
+  // Standard auth check for other routes
+  else if (to.meta.requiresAuth && !token) {
+    next('/login'); // Redirect to login page
   } 
   // If the route is for employers only and user is not an employer, redirect to dashboard
   else if (to.meta.employerOnly && userRole !== 'employer') {

@@ -13,7 +13,7 @@
             <input 
               type="text" 
               v-model="searchQuery" 
-              placeholder="Search by name or location..." 
+              placeholder="Search by name or location" 
               class="search-input"
               @input="filterCarers"
             />
@@ -1304,4 +1304,3 @@ export default {
 }
 </style>
 
-.
