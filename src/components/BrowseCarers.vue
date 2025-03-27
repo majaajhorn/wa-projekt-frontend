@@ -1,302 +1,311 @@
 <template>
-    <div class="browse-carers-container">
-      <!-- Page Title -->
-      <h1 class="page-title">Find the Perfect Carer</h1>
-      <p class="subtitle">Browse through qualified and experienced care professionals</p>
-      
-      <div class="search-results-layout">
-        <!-- Left Column - Filters -->
-        <div class="filters-column">
-          <div class="search-box">
-            <div class="search-input-wrapper">
-              <span class="search-icon">🔍</span>
-              <input 
-                type="text" 
-                v-model="searchQuery" 
-                placeholder="Search by name or location..." 
-                class="search-input"
-                @input="filterCarers"
-              />
-            </div>
-          </div>
-          
-          <div class="filter-section">
-            <h3 class="filter-heading">Gender</h3>
-            <div class="filter-buttons">
-              <button 
-                @click="toggleGenderFilter('any')" 
-                :class="['filter-btn', genderFilter === 'any' ? 'active' : '']">
-                Any
-              </button>
-              <button 
-                @click="toggleGenderFilter('male')" 
-                :class="['filter-btn', genderFilter === 'male' ? 'active' : '']">
-                Male
-              </button>
-              <button 
-                @click="toggleGenderFilter('female')" 
-                :class="['filter-btn', genderFilter === 'female' ? 'active' : '']">
-                Female
-              </button>
-            </div>
-          </div>
-          
-          <div class="filter-section">
-            <h3 class="filter-heading">Live-in Care Experience</h3>
-            <div class="checkbox-filters">
-              <label class="checkbox-label">
-                <input type="checkbox" v-model="filterCriteria.lessOneYear" @change="filterCarers">
-                <span class="custom-checkbox"></span>
-                Less than a year
-              </label>
-              <label class="checkbox-label">
-                <input type="checkbox" v-model="filterCriteria.oneToThreeYears" @change="filterCarers">
-                <span class="custom-checkbox"></span>
-                1-3 years
-              </label>
-              <label class="checkbox-label">
-                <input type="checkbox" v-model="filterCriteria.fourToSixYears" @change="filterCarers">
-                <span class="custom-checkbox"></span>
-                4-6 years
-              </label>
-              <label class="checkbox-label">
-                <input type="checkbox" v-model="filterCriteria.moreThanSixYears" @change="filterCarers">
-                <span class="custom-checkbox"></span>
-                More than 6 years
-              </label>
-            </div>
-          </div>
-          
-          <div class="filter-section">
-            <h3 class="filter-heading">English Language Level</h3>
-            <div class="checkbox-filters">
-              <label class="checkbox-label">
-                <input type="checkbox" v-model="filterCriteria.veryBasicEnglish" @change="filterCarers">
-                <span class="custom-checkbox"></span>
-                Very Basic
-              </label>
-              <label class="checkbox-label">
-                <input type="checkbox" v-model="filterCriteria.conversationalEnglish" @change="filterCarers">
-                <span class="custom-checkbox"></span>
-                Conversational
-              </label>
-              <label class="checkbox-label">
-                <input type="checkbox" v-model="filterCriteria.fluentEnglish" @change="filterCarers">
-                <span class="custom-checkbox"></span>
-                Fluent
-              </label>
-            </div>
-          </div>
-          
-          <div class="filter-section">
-            <h3 class="filter-heading">Driving License</h3>
-            <div class="radio-filters">
-              <label class="radio-label">
-                <input type="radio" name="drivingLicense" v-model="filterCriteria.drivingLicence" value="" @change="filterCarers">
-                <span class="custom-radio"></span>
-                Any
-              </label>
-              <label class="radio-label">
-                <input type="radio" name="drivingLicense" v-model="filterCriteria.drivingLicence" value="true" @change="filterCarers">
-                <span class="custom-radio"></span>
-                Yes
-              </label>
-              <label class="radio-label">
-                <input type="radio" name="drivingLicense" v-model="filterCriteria.drivingLicence" value="false" @change="filterCarers">
-                <span class="custom-radio"></span>
-                No
-              </label>
-            </div>
-          </div>
-          
-          <div class="filter-section">
-            <h3 class="filter-heading">Location</h3>
-            <div class="search-input-wrapper">
-              <input 
-                type="text" 
-                v-model="filterCriteria.location" 
-                placeholder="Enter location..." 
-                class="filter-input"
-                @input="filterCarers"
-              />
-            </div>
+  <div class="browse-carers-container">
+    <!-- Page Title -->
+    <h1 class="page-title">Find the Perfect Carer</h1>
+    <p class="subtitle">Browse through qualified and experienced care professionals</p>
+    
+    <div class="search-results-layout">
+      <!-- Left Column - Filters -->
+      <div class="filters-column">
+        <div class="search-box">
+          <div class="search-input-wrapper">
+            <span class="search-icon">🔍</span>
+            <input 
+              type="text" 
+              v-model="searchQuery" 
+              placeholder="Search by name or location..." 
+              class="search-input"
+              @input="filterCarers"
+            />
           </div>
         </div>
         
-        <!-- Right Column - Results -->
-        <div class="results-column">
-          <!-- Results Count -->
-          <div class="results-header">
-            <div class="results-count">
-              <span>Your search criteria returned </span>
-              <span class="count-highlight">{{ filteredCarers.length }}</span>
-              <span> {{ filteredCarers.length === 1 ? 'result' : 'results' }}.</span>
-            </div>
-            <div class="results-sort">
-              <span>The most recent profiles are listed first.</span>
-            </div>
+        <div class="filter-section">
+          <h3 class="filter-heading">Gender</h3>
+          <div class="filter-buttons">
+            <button 
+              @click="toggleGenderFilter('any')" 
+              :class="['filter-btn', genderFilter === 'any' ? 'active' : '']">
+              Any
+            </button>
+            <button 
+              @click="toggleGenderFilter('male')" 
+              :class="['filter-btn', genderFilter === 'male' ? 'active' : '']">
+              Male
+            </button>
+            <button 
+              @click="toggleGenderFilter('female')" 
+              :class="['filter-btn', genderFilter === 'female' ? 'active' : '']">
+              Female
+            </button>
           </div>
-          
-          <!-- Loading State -->
-          <div v-if="loading" class="loading-container">
-            <div class="spinner"></div>
-            <p>Searching for carers...</p>
+        </div>
+        
+        <div class="filter-section">
+          <h3 class="filter-heading">Live-in Care Experience</h3>
+          <div class="checkbox-filters">
+            <label class="checkbox-label">
+              <input type="checkbox" v-model="filterCriteria.lessOneYear" @change="filterCarers">
+              <span class="custom-checkbox"></span>
+              Less than a year
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" v-model="filterCriteria.oneToThreeYears" @change="filterCarers">
+              <span class="custom-checkbox"></span>
+              1-3 years
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" v-model="filterCriteria.fourToSixYears" @change="filterCarers">
+              <span class="custom-checkbox"></span>
+              4-6 years
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" v-model="filterCriteria.moreThanSixYears" @change="filterCarers">
+              <span class="custom-checkbox"></span>
+              More than 6 years
+            </label>
           </div>
-          
-          <!-- Error State -->
-          <div v-else-if="error" class="error-container">
-            <div class="error-icon">⚠️</div>
-            <p>{{ error }}</p>
-            <button @click="fetchCarers" class="retry-button">Try Again</button>
+        </div>
+        
+        <div class="filter-section">
+          <h3 class="filter-heading">English Language Level</h3>
+          <div class="checkbox-filters">
+            <label class="checkbox-label">
+              <input type="checkbox" v-model="filterCriteria.veryBasicEnglish" @change="filterCarers">
+              <span class="custom-checkbox"></span>
+              Very Basic
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" v-model="filterCriteria.conversationalEnglish" @change="filterCarers">
+              <span class="custom-checkbox"></span>
+              Conversational
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" v-model="filterCriteria.fluentEnglish" @change="filterCarers">
+              <span class="custom-checkbox"></span>
+              Fluent
+            </label>
           </div>
-          
-          <!-- Empty State -->
-          <div v-else-if="filteredCarers.length === 0" class="empty-container">
-            <div class="empty-icon">🔍</div>
-            <h3>No Carers Found</h3>
-            <p>We couldn't find any carers matching your search criteria.</p>
-            <button @click="resetFilters" class="reset-button">Reset All Filters</button>
+        </div>
+        
+        <div class="filter-section">
+          <h3 class="filter-heading">Driving License</h3>
+          <div class="radio-filters">
+            <label class="radio-label">
+              <input type="radio" name="drivingLicense" v-model="filterCriteria.drivingLicence" value="" @change="filterCarers">
+              <span class="custom-radio"></span>
+              Any
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="drivingLicense" v-model="filterCriteria.drivingLicence" value="true" @change="filterCarers">
+              <span class="custom-radio"></span>
+              Yes
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="drivingLicense" v-model="filterCriteria.drivingLicence" value="false" @change="filterCarers">
+              <span class="custom-radio"></span>
+              No
+            </label>
           </div>
-          
-          <!-- Carer List -->
-          <div v-else class="carer-list">
-            <div v-for="carer in filteredCarers" :key="carer._id" class="carer-card">
-              <div class="carer-card-content">
-                <div class="carer-info-section">
-                  <div class="carer-header">
-                    <div class="carer-title">
-                      <h3>{{ carer.fullName }}</h3>
-                      <div class="updated-time">Updated {{ getRandomHours() }} hours ago</div>
-                    </div>
-                  </div>
-                  
-                  <!-- Display actual care skills as tags -->
-                  <div class="carer-skills">
-                    <span v-if="hasExperience(carer, 'brain_injury')" class="skill-tag">Brain Injury</span>
-                    <span v-if="hasExperience(carer, 'catheter_care')" class="skill-tag">Catheter Care</span>
-                    <span v-if="hasExperience(carer, 'complex_care')" class="skill-tag">Complex Care</span>
-                    <span v-if="hasExperience(carer, 'dementia')" class="skill-tag">Dementia</span>
-                    <span v-if="hasExperience(carer, 'end_of_life')" class="skill-tag">End of life / Palliative Care</span>
-                    <span v-if="hasExperience(carer, 'epilepsy')" class="skill-tag">Epilepsy / Partial metabolism</span>
-                    <span v-if="hasExperience(carer, 'stroke_recovery')" class="skill-tag">Stroke Recovery</span>
-                    <span v-if="hasExperience(carer, 'young_people')" class="skill-tag">Children / Young People</span>
-                    <span v-if="hasExperience(carer, 'cancer')" class="skill-tag">Cancer</span>
-                  </div>
-                  
-                  <!-- Display actual description from database -->
-                  <div class="carer-description" v-if="carer.profileData?.description">
-                    <p>{{ carer.profileData.description }}</p>
-                  </div>
-                  
-                  <div class="carer-meta">
-                    <div class="meta-item">
-                      <span class="years-icon">⏱️</span>
-                      <span>{{ formatText(carer.profileData?.liveInExperience) || 'No experience' }}</span>
-                    </div>
-                    <div class="meta-item">
-                      <span class="gender-icon">{{ carer.profileData?.gender === 'male' ? '👨' : '👩' }}</span>
-                      <span>{{ capitalize(carer.profileData?.gender) || 'Not specified' }}</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="carer-profile-section">
-                  <div class="carer-image">
-                    <img 
-                      :src="carer.profilePicture || defaultProfileImage" 
-                      alt="Profile picture"
-                      @error="handleImageError($event)"
-                    />
-                  </div>
-                  <button class="view-profile-btn" @click="showProfile(carer)">View profile</button>
-                </div>
-              </div>
-            </div>
+        </div>
+        
+        <div class="filter-section">
+          <h3 class="filter-heading">Location</h3>
+          <div class="search-input-wrapper">
+            <input 
+              type="text" 
+              v-model="filterCriteria.location" 
+              placeholder="Enter location..." 
+              class="filter-input"
+              @input="filterCarers"
+            />
           </div>
         </div>
       </div>
       
-      <!-- Profile Modal -->
-      <div v-if="selectedCarer" class="profile-modal-overlay" @click="closeProfile">
-        <div class="profile-modal-content" @click.stop>
-          <button class="close-modal-button" @click="closeProfile">✕</button>
-          
-          <div class="profile-header">
-            <div class="profile-image">
-              <img 
-                :src="selectedCarer.profilePicture || defaultProfileImage" 
-                alt="Profile picture"
-                @error="handleImageError($event)"
-              />
-            </div>
-            <div class="profile-titles">
-              <h2 class="profile-name">{{ selectedCarer.fullName }}</h2>
-              <p class="profile-location">
-                <span class="location-icon">📍</span> 
-                {{ selectedCarer.profileData?.location || 'Location not specified' }}
-              </p>
-            </div>
+      <!-- Right Column - Results -->
+      <div class="results-column">
+        <!-- Results Count -->
+        <div class="results-header">
+          <div class="results-count">
+            <span>Your search criteria returned </span>
+            <span class="count-highlight">{{ filteredCarers.length }}</span>
+            <span> {{ filteredCarers.length === 1 ? 'result' : 'results' }}.</span>
           </div>
-          
-          <div class="profile-body">
-            <!-- Description section if available -->
-            <div class="profile-section" v-if="selectedCarer.profileData?.description">
-              <p class="profile-description">{{ selectedCarer.profileData.description }}</p>
-            </div>
-          
-            <!-- Key details section -->
-            <div class="profile-section">
-              <h3 class="profile-section-title">Key Details</h3>
-              <div class="profile-details-grid">
-                <div class="profile-detail-item">
-                  <div class="detail-label">English Level</div>
-                  <div class="detail-value">{{ formatText(selectedCarer.profileData?.englishLevel) || 'Not specified' }}</div>
+          <div class="results-sort">
+            <span>The most recent profiles are listed first.</span>
+          </div>
+        </div>
+        
+        <!-- Loading State -->
+        <div v-if="loading" class="loading-container">
+          <div class="spinner"></div>
+          <p>Searching for carers...</p>
+        </div>
+        
+        <!-- Error State -->
+        <div v-else-if="error" class="error-container">
+          <div class="error-icon">⚠️</div>
+          <p>{{ error }}</p>
+          <button @click="fetchCarers" class="retry-button">Try Again</button>
+        </div>
+        
+        <!-- Empty State -->
+        <div v-else-if="filteredCarers.length === 0" class="empty-container">
+          <div class="empty-icon">🔍</div>
+          <h3>No Carers Found</h3>
+          <p>We couldn't find any carers matching your search criteria.</p>
+          <button @click="resetFilters" class="reset-button">Reset All Filters</button>
+        </div>
+        
+        <!-- Carer List -->
+        <div v-else class="carer-list">
+          <div v-for="carer in filteredCarers" :key="carer._id" class="carer-card">
+            <div class="carer-card-content">
+              <div class="carer-info-section">
+                
+                <!-- Display actual care skills as tags -->
+                <div class="carer-skills">
+                  <span v-if="hasExperience(carer, 'brain_injury')" class="skill-tag">Brain Injury</span>
+                  <span v-if="hasExperience(carer, 'catheter_care')" class="skill-tag">Catheter Care</span>
+                  <span v-if="hasExperience(carer, 'complex_care')" class="skill-tag">Complex Care</span>
+                  <span v-if="hasExperience(carer, 'dementia')" class="skill-tag">Dementia</span>
+                  <span v-if="hasExperience(carer, 'end_of_life')" class="skill-tag">End of life / Palliative Care</span>
+                  <span v-if="hasExperience(carer, 'epilepsy')" class="skill-tag">Epilepsy / Partial metabolism</span>
+                  <span v-if="hasExperience(carer, 'stroke_recovery')" class="skill-tag">Stroke Recovery</span>
+                  <span v-if="hasExperience(carer, 'young_people')" class="skill-tag">Children / Young People</span>
+                  <span v-if="hasExperience(carer, 'cancer')" class="skill-tag">Cancer</span>
                 </div>
-                <div class="profile-detail-item">
-                  <div class="detail-label">Live-in Experience</div>
-                  <div class="detail-value">{{ formatText(selectedCarer.profileData?.liveInExperience) || 'No' }}</div>
+
+                <!-- Add About section -->
+                <div v-if="carer.profileData?.aboutYourself" class="carer-about">
+                  <p>{{ carer.profileData.aboutYourself }}</p>
                 </div>
-                <div class="profile-detail-item">
-                  <div class="detail-label">Driving License</div>
-                  <div class="detail-value">{{ selectedCarer.profileData?.drivingLicence ? 'Yes' : 'No' }}</div>
+                
+                <!-- Keep existing description if needed -->
+                <div class="carer-description" v-if="carer.profileData?.description">
+                  <p>{{ carer.profileData.description }}</p>
                 </div>
-                <div class="profile-detail-item">
-                  <div class="detail-label">Gender</div>
-                  <div class="detail-value">{{ capitalize(selectedCarer.profileData?.gender) || 'Not specified' }}</div>
+                
+                <div class="carer-meta">
+                  <div class="meta-item">
+                    <span class="years-icon">⏱️</span>
+                    <span>{{ formatText(carer.profileData?.liveInExperience) || 'No experience' }}</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="gender-icon">{{ carer.profileData?.gender === 'male' ? '👨' : '👩' }}</span>
+                    <span>{{ capitalize(carer.profileData?.gender) || 'Not specified' }}</span>
+                  </div>
                 </div>
               </div>
+              
+              <div class="carer-profile-section">
+                <div class="carer-image">
+                  <img 
+                    :src="carer.profilePicture || defaultProfileImage" 
+                    alt="Profile picture"
+                    @error="handleImageError($event)"
+                  />
+                </div>
+                <button class="view-profile-btn" @click="showProfile(carer)">View profile</button>
+              </div>
             </div>
-            
-            <!-- Qualifications section -->
-            <div class="profile-section" v-if="selectedCarer.profileData?.qualification && selectedCarer.profileData.qualification.length > 0">
-              <h3 class="profile-section-title">Qualifications</h3>
-              <ul class="profile-list">
-                <li v-for="(qual, index) in formatText(selectedCarer.profileData.qualification)" :key="index">
-                  {{ qual }}
-                </li>
-              </ul>
-            </div>
-            
-            <!-- Care Experience section -->
-            <div class="profile-section" v-if="selectedCarer.profileData?.careExperience && selectedCarer.profileData.careExperience.length > 0">
-              <h3 class="profile-section-title">Care Experience</h3>
-              <ul class="profile-list">
-                <li v-for="(exp, index) in formatText(selectedCarer.profileData.careExperience)" :key="index">
-                  {{ exp }}
-                </li>
-              </ul>
-            </div>
-          </div>
-          
-          <div class="profile-footer">
-            <button class="contact-button-large">
-              <span class="contact-icon">✉️</span> Contact {{ selectedCarer.fullName.split(' ')[0] }}
-            </button>
           </div>
         </div>
       </div>
     </div>
-  </template>
+    
+    <!-- Profile Modal -->
+<div v-if="selectedCarer" class="profile-modal-overlay" @click="closeProfile">
+  <div class="profile-modal-content" @click.stop>
+    <button class="close-modal-button" @click="closeProfile">✕</button>
+    
+    <div class="profile-header">
+      <div class="profile-image">
+        <img 
+          :src="selectedCarer.profilePicture || defaultProfileImage" 
+          alt="Profile picture"
+          @error="handleImageError($event)"
+        />
+      </div>
+      <div class="profile-titles">
+        <h2 class="profile-name">{{ selectedCarer.fullName }}</h2>
+        <p class="profile-location">
+          <span class="location-icon">📍</span> 
+          {{ selectedCarer.profileData?.location || 'Location not specified' }}
+        </p>
+        <p class="profile-email">
+          <span class="email-icon">✉️</span> 
+          {{ selectedCarer.email }}
+        </p>
+      </div>
+    </div>
+    
+    <div class="profile-body">
+      <!-- About section -->
+      <div class="profile-section" v-if="selectedCarer.profileData?.aboutYourself">
+        <h3 class="profile-section-title">About</h3>
+        <p class="profile-about">{{ selectedCarer.profileData.aboutYourself }}</p>
+      </div>
+      
+      <!-- Description section if available -->
+      <div class="profile-section" v-if="selectedCarer.profileData?.description">
+        <p class="profile-description">{{ selectedCarer.profileData.description }}</p>
+      </div>
+    
+      <!-- Key details section -->
+      <div class="profile-section">
+        <h3 class="profile-section-title">Key Details</h3>
+        <div class="profile-details-grid">
+          <div class="profile-detail-item">
+            <div class="detail-label">English Level</div>
+            <div class="detail-value">{{ formatText(selectedCarer.profileData?.englishLevel) || 'Not specified' }}</div>
+          </div>
+          <div class="profile-detail-item">
+            <div class="detail-label">Live-in Experience</div>
+            <div class="detail-value">{{ formatText(selectedCarer.profileData?.liveInExperience) || 'No' }}</div>
+          </div>
+          <div class="profile-detail-item">
+            <div class="detail-label">Driving License</div>
+            <div class="detail-value">{{ selectedCarer.profileData?.drivingLicence ? 'Yes' : 'No' }}</div>
+          </div>
+          <div class="profile-detail-item">
+            <div class="detail-label">Gender</div>
+            <div class="detail-value">{{ capitalize(selectedCarer.profileData?.gender) || 'Not specified' }}</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Qualifications section -->
+      <div class="profile-section" v-if="selectedCarer.profileData?.qualification && selectedCarer.profileData.qualification.length > 0">
+        <h3 class="profile-section-title">Qualifications</h3>
+        <ul class="profile-list">
+          <li v-for="(qual, index) in formatText(selectedCarer.profileData.qualification)" :key="index">
+            {{ qual }}
+          </li>
+        </ul>
+      </div>
+      
+      <!-- Care Experience section -->
+      <div class="profile-section" v-if="selectedCarer.profileData?.careExperience && selectedCarer.profileData.careExperience.length > 0">
+        <h3 class="profile-section-title">Care Experience</h3>
+        <ul class="profile-list">
+          <li v-for="(exp, index) in formatText(selectedCarer.profileData.careExperience)" :key="index">
+            {{ exp }}
+          </li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="profile-footer">
+      <button class="contact-button-large">
+        <span class="contact-icon">✉️</span> Contact {{ selectedCarer.fullName.split(' ')[0] }}
+      </button>
+    </div>
+  </div>
+  </div>
+  </div>
+</template>
 
 <script>
 import axios from 'axios';
@@ -525,11 +534,6 @@ export default {
       
       return false;
     },
-    
-    // Get random hours for the "Updated X hours ago" - replace with actual data when available
-    getRandomHours() {
-      return Math.floor(Math.random() * 12) + 1;
-    }
   },
   mounted() {
     console.log('BrowseCarers component mounted');
@@ -799,6 +803,18 @@ export default {
   animation: spin 1s linear infinite;
   margin-bottom: 15px;
 }
+.profile-email {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  color: #64748b;
+  margin: 8px 0 0 0;
+}
+
+.email-icon {
+  color: #4299e1;
+}
 
 @keyframes spin {
   0% { transform: rotate(0deg); }
@@ -954,6 +970,33 @@ export default {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* About section in carer card */
+.carer-about {
+  margin-bottom: 15px;
+  font-size: 14px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.carer-about p {
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* About section in profile modal */
+.profile-about {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #334155;
+  margin: 0;
+  white-space: pre-line;
 }
 
 .view-profile-btn {

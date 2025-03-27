@@ -137,6 +137,18 @@
           </div>
         </template>
 
+        <!-- About Yourself Section - for both roles -->
+        <div class="form-group full-width">
+          <label for="aboutYourself">About Yourself</label>
+          <textarea 
+            v-model="profileData.aboutYourself" 
+            id="aboutYourself" 
+            placeholder="Tell us about yourself, your experience, skills, and interests..." 
+            class="text-area"
+            rows="5"
+          ></textarea>
+        </div>
+
         <div class="form-actions">
           <button type="button" @click="editProfile = false" class="cancel-btn">Cancel</button>
           <button type="submit" class="primary-btn">Save Profile</button>
@@ -162,6 +174,21 @@
       <div class="form-actions">
         <button @click="editPassword = false" class="cancel-btn">Cancel</button>
         <button @click="updatePassword" class="primary-btn">Save Password</button>
+      </div>
+    </div>
+
+    <!-- Edit About Form -->
+    <div v-if="showEditAbout" class="modal-form">
+      <h3 class="section-title">About Yourself</h3>
+      <textarea 
+        v-model="aboutYourselfText" 
+        placeholder="Tell us about yourself, your experience, skills, and interests..." 
+        class="text-area"
+        rows="5"
+      ></textarea>
+      <div class="form-actions">
+        <button @click="showEditAbout = false" class="cancel-btn">Cancel</button>
+        <button @click="updateAbout" class="primary-btn">Save</button>
       </div>
     </div>
 
@@ -243,6 +270,18 @@
             <span class="info-value">{{ formatString(user.profileData?.drivingLicence) }}</span>
           </div>
         </template>
+
+        <!-- About section for both roles -->
+        <div class="info-item full-width">
+          <span class="info-label">About</span>
+          <div class="about-content">
+            <p v-if="user.profileData?.aboutYourself">{{ user.profileData.aboutYourself }}</p>
+            <span v-else class="info-value empty">No information provided</span>
+            <button @click="editAbout" class="edit-about-btn">
+              <span>Edit</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -272,7 +311,12 @@ export default {
       careExperience: [], // Changed to array for multiple selections
       liveInExperience: '',
       drivingLicence: '',
+      aboutYourself: '', // Added for About section
     });
+    
+    // About section refs
+    const showEditAbout = ref(false);
+    const aboutYourselfText = ref('');
     
     // Options for qualification checkboxes
     const qualificationOptions = ref([
@@ -332,6 +376,7 @@ export default {
           ...user.value.profileData,
           gender: user.value.profileData.gender || '',
           location: user.value.profileData.location || '',
+          aboutYourself: user.value.profileData.aboutYourself || '', // Added for About section
         };
         
         // Fields specific to jobseeker
@@ -363,7 +408,8 @@ export default {
         // Initialize empty profile data if none exists
         profileData.value = {
           gender: '',
-          location: ''
+          location: '',
+          aboutYourself: '' // Added for About section
         };
         
         // Add role-specific empty fields
@@ -386,6 +432,35 @@ export default {
       
       // Toggle edit mode
       editProfile.value = true;
+    };
+    
+    // Edit About section
+    const editAbout = () => {
+      aboutYourselfText.value = user.value.profileData?.aboutYourself || '';
+      showEditAbout.value = true;
+    };
+    
+    // Update About section
+    const updateAbout = async () => {
+      try {
+        const payload = {
+          aboutYourself: aboutYourselfText.value
+        };
+
+        await apiClient.put('/auth/update-profile', payload);
+        
+        // Update local user data
+        if (!user.value.profileData) {
+          user.value.profileData = {};
+        }
+        user.value.profileData.aboutYourself = aboutYourselfText.value;
+        
+        alert('About information updated successfully!');
+        showEditAbout.value = false;
+      } catch (error) {
+        console.error('Error updating about information:', error);
+        alert('Error updating information. Please try again.');
+      }
     };
 
     // Fetch user profile when the component is mounted
@@ -548,7 +623,12 @@ export default {
       goBack,
       formatString,
       getInitials,
-      handleEditProfile, // Expose the new method
+      handleEditProfile,
+      // About section
+      showEditAbout,
+      aboutYourselfText,
+      editAbout,
+      updateAbout,
     };
   },
 };
@@ -774,6 +854,24 @@ export default {
   box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
 }
 
+/* Text area for About section */
+.text-area {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 15px;
+  transition: border-color 0.2s;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.text-area:focus {
+  border-color: #4CAF50;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
 /* Custom select */
 .custom-select {
   position: relative;
@@ -981,6 +1079,40 @@ export default {
 .info-value.empty {
   color: #adb5bd;
   font-style: italic;
+}
+
+/* About content styling */
+.about-content {
+  background-color: #f8f9fa;
+  padding: 12px;
+  border-radius: 4px;
+  margin: 5px 0;
+  position: relative;
+}
+
+.about-content p {
+  margin: 0;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.edit-about-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  color: #495057;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.edit-about-btn:hover {
+  background-color: #e9ecef;
+  border-color: #ced4da;
 }
 
 /* Tags for skills display */
