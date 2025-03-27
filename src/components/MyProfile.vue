@@ -177,18 +177,25 @@
       </div>
     </div>
 
-    <!-- Edit About Form -->
-    <div v-if="showEditAbout" class="modal-form">
-      <h3 class="section-title">About Yourself</h3>
-      <textarea 
-        v-model="aboutYourselfText" 
-        placeholder="Tell us about yourself, your experience, skills, and interests..." 
-        class="text-area"
-        rows="5"
-      ></textarea>
-      <div class="form-actions">
-        <button @click="showEditAbout = false" class="cancel-btn">Cancel</button>
-        <button @click="updateAbout" class="primary-btn">Save</button>
+    <!-- Edit About Modal Popup -->
+    <div v-if="showEditAbout" class="modal-overlay">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3 class="modal-title">About Yourself</h3>
+          <button @click="closeEditAbout" class="modal-close-btn">✕</button>
+        </div>
+        <div class="modal-body">
+          <textarea 
+            v-model="aboutYourselfText" 
+            placeholder="Tell us about yourself, your experience, skills, and interests..." 
+            class="text-area"
+            rows="8"
+          ></textarea>
+        </div>
+        <div class="modal-footer">
+          <button @click="closeEditAbout" class="cancel-btn">Cancel</button>
+          <button @click="updateAbout" class="primary-btn">Save</button>
+        </div>
       </div>
     </div>
 
@@ -434,10 +441,17 @@ export default {
       editProfile.value = true;
     };
     
-    // Edit About section
+    // Edit About section with modal
     const editAbout = () => {
       aboutYourselfText.value = user.value.profileData?.aboutYourself || '';
       showEditAbout.value = true;
+      document.body.classList.add('body-no-scroll'); // Prevent scrolling
+    };
+    
+    // Close About modal
+    const closeEditAbout = () => {
+      showEditAbout.value = false;
+      document.body.classList.remove('body-no-scroll');
     };
     
     // Update About section
@@ -457,6 +471,7 @@ export default {
         
         alert('About information updated successfully!');
         showEditAbout.value = false;
+        document.body.classList.remove('body-no-scroll'); // Re-enable scrolling
       } catch (error) {
         console.error('Error updating about information:', error);
         alert('Error updating information. Please try again.');
@@ -628,6 +643,7 @@ export default {
       showEditAbout,
       aboutYourselfText,
       editAbout,
+      closeEditAbout,
       updateAbout,
     };
   },
@@ -1129,6 +1145,104 @@ export default {
   border-radius: 20px;
   font-size: 14px;
   display: inline-block;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-container {
+  background-color: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #999;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.modal-close-btn:hover {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.modal-body .text-area {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 15px;
+  resize: vertical;
+  min-height: 150px;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.modal-body .text-area:focus {
+  border-color: #4CAF50;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.modal-footer {
+  padding: 15px 20px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Prevent body scrolling when modal is open */
+.body-no-scroll {
+  overflow: hidden;
 }
 
 /* Responsive adjustments */
