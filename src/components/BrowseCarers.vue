@@ -202,10 +202,14 @@
               <div class="carer-profile-section">
                 <div class="carer-image">
                   <img 
-                    :src="carer.profilePicture || defaultProfileImage" 
+                    v-if="carer.profilePicture" 
+                    :src="carer.profilePicture" 
                     alt="Profile picture"
-                    @error="handleImageError($event)"
+                    @error="handleImageError($event, carer)"
                   />
+                  <div v-else class="profile-initials">
+                    {{ getInitials(carer.fullName) }}
+                  </div>
                 </div>
                 <button class="view-profile-btn" @click="showProfile(carer)">View profile</button>
               </div>
@@ -223,10 +227,14 @@
     <div class="profile-header">
       <div class="profile-image">
         <img 
-          :src="selectedCarer.profilePicture || defaultProfileImage" 
+          v-if="selectedCarer.profilePicture" 
+          :src="selectedCarer.profilePicture" 
           alt="Profile picture"
-          @error="handleImageError($event)"
+          @error="handleImageError($event, selectedCarer)"
         />
+        <div v-else class="profile-initials">
+          {{ getInitials(selectedCarer.fullName) }}
+        </div>
       </div>
       <div class="profile-titles">
         <h2 class="profile-name">{{ selectedCarer.fullName }}</h2>
@@ -484,8 +492,13 @@ export default {
       this.filterCarers();
     },
     
-    handleImageError(event) {
-      event.target.src = this.defaultProfileImage;
+    handleImageError(event, carer) {
+    // Instead of replacing with default image, we'll use v-if/v-else with initials
+    if (carer) {
+      carer.profilePicture = null; // Setting to null will trigger the v-else condition
+    } else {
+      event.target.style.display = 'none'; // Fallback if carer object is not provided
+      }
     },
     
     formatText(text) {
@@ -533,6 +546,16 @@ export default {
       }
       
       return false;
+    },
+
+    getInitials(name) {
+      if (!name) return '';
+      return name
+        .split(' ')
+        .map(part => part[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
     },
   },
   mounted() {
@@ -814,6 +837,18 @@ export default {
 
 .email-icon {
   color: #4299e1;
+}
+
+.profile-initials {
+  width: 100%;
+  height: 100%;
+  background-color: #4299e1;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: bold;
 }
 
 @keyframes spin {
