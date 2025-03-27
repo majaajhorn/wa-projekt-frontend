@@ -74,11 +74,47 @@
           </p>
         </div>
       </div>
+
+      <!-- Back to top button -->
+      <button 
+        class="back-to-top" 
+        :class="{ 'visible': showBackToTop }"
+        @click="scrollToTop"
+        aria-label="Back to top"
+      >
+        <span class="arrow-up">↑</span>
+      </button>
     </div>
   </template>
   
   <script setup>
- 
+ import { ref, onMounted, onUnmounted } from 'vue';
+
+// Reactive reference to control button visibility
+const showBackToTop = ref(false);
+
+// Function to scroll to top
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+};
+
+// Function to check scroll position and show/hide button
+const handleScroll = () => {
+  // Show button when page is scrolled down 300px or more
+  showBackToTop.value = window.scrollY > 300;
+};
+
+// Add and remove scroll event listener
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll);
+});
   </script>
   
   <style scoped>
@@ -291,4 +327,56 @@
       padding: 2rem;
     }
   }
+
+  /* Back to top button styles */
+.back-to-top {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #4299e1;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.back-to-top.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.back-to-top:hover {
+  background-color: #3182ce;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+}
+
+.arrow-up {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .back-to-top {
+    width: 40px;
+    height: 40px;
+    bottom: 20px;
+    right: 20px;
+  }
+  
+  .arrow-up {
+    font-size: 20px;
+  }
+}
   </style>
