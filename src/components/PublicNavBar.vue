@@ -7,9 +7,6 @@
       </div>
       
       <div class="navbar-links">
-        <router-link to="/about" class="nav-link">
-          About
-        </router-link>
         
         <router-link to="/login" class="nav-link login-link">
           Login

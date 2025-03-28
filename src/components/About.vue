@@ -123,7 +123,7 @@ onUnmounted(() => {
     justify-content: center;
     padding: 0px 20px;
     max-width: 100%;
-    background-color: #f8fafc;
+    background-color: #fff;
     min-height: 100vh;
   }
   
@@ -132,7 +132,7 @@ onUnmounted(() => {
     width: 100%;
     background-color: white;
     border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+   /* box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);*/
     padding: 40px;
   }
   
