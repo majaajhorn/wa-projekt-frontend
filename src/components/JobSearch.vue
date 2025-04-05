@@ -171,31 +171,29 @@
                   </span>
                 </div>
 
-                <!-- Update the job-requirements section in the job card -->
-                <div class="job-requirements">
-                  <span v-if="job.jobType || job.employmentType" class="requirement-tag">
-                    {{ formatJobType(job.jobType || job.employmentType) }}
-                  </span>
-                  <span v-if="job.experienceLevel" class="requirement-tag">{{ job.experienceLevel }}</span>
-                  <span v-if="job.drivingLicense" class="requirement-tag">Driving License Required</span>
-                  <span v-for="(qualification, index) in job.qualifications" :key="index" class="requirement-tag">
-                    {{ formatText(qualification) }}
-                  </span>
+                <!-- Employment type tag -->
+                <div v-if="job.employmentType" class="job-type-tag">
+                  {{ formatJobType(job.employmentType) }}
                 </div>
-                
+
                 <!-- Job Description -->
                 <div v-if="job.description" class="job-description">
                   <p>{{ job.description }}</p>
                 </div>
                 
-                <div class="job-meta">
-                  <div class="meta-item salary">
-                    <span class="salary-icon">💰</span>
-                    <span>{{ formatSalary(job.salaryMin, job.salaryMax) }}</span>
+                <!-- Job metadata -->
+                <div class="job-meta-row">
+                  <div class="meta-item">
+                    <span class="icon">💰</span>
+                    <span>{{ formatSalary(job) }}</span>
                   </div>
-                  <div class="meta-item date">
-                    <span class="date-icon">📅</span>
-                    <span>{{ formatDate(job.createdAt) }}</span>
+                  <div class="meta-item">
+                    <span class="icon">🕒</span>
+                    <span>{{ formatJobType(job.employmentType) }}</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="icon">📅</span>
+                    <span>{{ formatDate(job.createdAt || job.postedDate) }}</span>
                   </div>
                 </div>
               </div>
@@ -228,16 +226,7 @@
           <!-- Salary section -->
           <div class="job-modal-section">
             <h3 class="job-modal-section-title">Salary</h3>
-            <p class="job-modal-salary">
-              <!-- First check for single salary value -->
-              <span v-if="selectedJob.salary">
-                £{{ selectedJob.salary.toLocaleString() }} {{ formatSalaryPeriod(selectedJob.salaryPeriod) }}
-              </span>
-              <!-- Fall back to min/max if no single salary -->
-              <span v-else>
-                {{ formatSalary(selectedJob.salaryMin, selectedJob.salaryMax) }}
-              </span>
-            </p>
+            <p class="job-modal-salary">{{ formatSalary(selectedJob) }}</p>
           </div>
           
           <!-- Description section -->
@@ -262,18 +251,18 @@
                 <div class="detail-label">Driving License</div>
                 <div class="detail-value">{{ selectedJob.drivingLicense ? 'Required' : 'Not Required' }}</div>
               </div>
-          </div>
+            </div>
               
-              <!-- Add list of requirements if present with more spacing -->
-          <div v-if="selectedJob.requirements && selectedJob.requirements.length > 0" class="job-modal-additional-requirements">
-            <h4 class="additional-requirements-title">Additional Requirements</h4>
-            <ul class="requirements-list">
-              <li v-for="(req, index) in formatRequirementsList(selectedJob.requirements)" :key="index" class="requirement-item">
-                {{ req }}
-              </li>
-            </ul>
+            <!-- Additional requirements with more spacing -->
+            <div v-if="selectedJob.requirements && selectedJob.requirements.length > 0" class="job-modal-additional-requirements">
+              <h4 class="additional-requirements-title">Additional Requirements</h4>
+              <ul class="requirements-list">
+                <li v-for="(req, index) in formatRequirementsList(selectedJob.requirements)" :key="index" class="requirement-item">
+                  {{ req }}
+                </li>
+              </ul>
+            </div>
           </div>
-        </div>
           
           <!-- Qualifications section -->
           <div class="job-modal-section" v-if="selectedJob.qualifications && selectedJob.qualifications.length > 0">
@@ -295,7 +284,7 @@
             </ul>
           </div>
           
-          <!-- Replace the Contact Information section to use employer email -->
+          <!-- Contact Information section -->
           <div class="job-modal-section">
             <h3 class="job-modal-section-title">Contact Information</h3>
             <p class="job-modal-contact">
@@ -307,6 +296,7 @@
               <span class="contact-value">{{ selectedJob.contactPhone }}</span>
             </p>
           </div>
+        </div>
         
         <div class="job-modal-footer">
           <button class="apply-button-large" @click="applyForJob(selectedJob)">
@@ -315,7 +305,6 @@
         </div>
       </div>
     </div>
-  </div>
   </div>
 </template>
 
@@ -366,13 +355,7 @@ export default {
         
         // Fetch data from API
         const response = await apiClient.get('/jobs');
-        
         console.log('API Response:', response.data);
-        
-        // Log the first job to check data structure
-        if (response.data.length > 0) {
-          console.log('First job data structure:', response.data[0]);
-        }
         
         this.jobs = response.data;
         this.filteredJobs = [...this.jobs];
@@ -385,62 +368,85 @@ export default {
     },
     
     filterJobs() {
-  console.log('Filtering jobs with search query:', this.searchQuery);
-  console.log('Filter criteria:', this.filterCriteria);
-  
-  this.filteredJobs = this.jobs.filter(job => {
-    // Search by title or location (case insensitive)
-    const searchTerm = this.searchQuery.toLowerCase().trim();
-    const jobTitle = (job.title || '').toLowerCase();
-    const jobLocation = (job.location || '').toLowerCase();
-    const jobCompany = (job.company || '').toLowerCase();
-    
-    // Check if search term is found in title, location, or company
-    const matchesSearch = this.searchQuery === '' || 
-      jobTitle.includes(searchTerm) || 
-      jobLocation.includes(searchTerm) || 
-      jobCompany.includes(searchTerm);
-    
-    // Job Type filter
-    const matchesJobType = this.jobTypeFilter === 'any' || 
-      job.jobType === this.jobTypeFilter || 
-      job.employmentType === this.jobTypeFilter;
-    
-    // Driving License filter
-    let matchesDrivingLicense = true;
-    if (this.filterCriteria.drivingLicense) {
-      const drivingValue = job.drivingLicense;
-      if (this.filterCriteria.drivingLicense === 'true') {
-        matchesDrivingLicense = drivingValue === true || drivingValue === 'yes' || drivingValue === 'true';
-      } else if (this.filterCriteria.drivingLicense === 'false') {
-        matchesDrivingLicense = drivingValue === false || drivingValue === 'no' || drivingValue === 'false' || !drivingValue;
-      }
-    }
-    
-    // Salary Range filter
-    let matchesSalary = true;
-    if (this.filterCriteria.salaryMin && !isNaN(parseInt(this.filterCriteria.salaryMin))) {
-      // Check both single salary value and salaryMax fields
-      matchesSalary = (job.salary && job.salary >= parseInt(this.filterCriteria.salaryMin)) || 
-                      (job.salaryMax && job.salaryMax >= parseInt(this.filterCriteria.salaryMin));
-    }
-    if (this.filterCriteria.salaryMax && !isNaN(parseInt(this.filterCriteria.salaryMax))) {
-      // Check both single salary value and salaryMin fields
-      matchesSalary = matchesSalary && 
-                      ((job.salary && job.salary <= parseInt(this.filterCriteria.salaryMax)) || 
-                       (job.salaryMin && job.salaryMin <= parseInt(this.filterCriteria.salaryMax)));
-    }
-    
-    // Location filter - uses text input for partial matches
-    const matchesLocation = !this.filterCriteria.location || 
-      (job.location || '').toLowerCase().includes(this.filterCriteria.location.toLowerCase());
-    
-    return matchesSearch && matchesJobType && matchesDrivingLicense && 
-           matchesSalary && matchesLocation;
-  });
-  
-  console.log('Filtered jobs count:', this.filteredJobs.length);
-},
+      console.log('Filtering jobs with search query:', this.searchQuery);
+      console.log('Filter criteria:', this.filterCriteria);
+      
+      this.filteredJobs = this.jobs.filter(job => {
+        // Search by title or location (case insensitive)
+        const searchTerm = this.searchQuery.toLowerCase().trim();
+        const jobTitle = (job.title || '').toLowerCase();
+        const jobLocation = (job.location || '').toLowerCase();
+        const jobCompany = (job.company || '').toLowerCase();
+        
+        // Check if search term is found in title, location, or company
+        const matchesSearch = this.searchQuery === '' || 
+          jobTitle.includes(searchTerm) || 
+          jobLocation.includes(searchTerm) || 
+          jobCompany.includes(searchTerm);
+        
+        // Job Type filter
+        const matchesJobType = this.jobTypeFilter === 'any' || 
+          job.jobType === this.jobTypeFilter || 
+          job.employmentType === this.jobTypeFilter;
+        
+        // Qualifications filter
+        let matchesQualifications = true;
+        if (this.filterCriteria.nursingQualification || this.filterCriteria.medicalQualification || 
+            this.filterCriteria.nvqQualification) {
+          matchesQualifications = false;
+          const qualifications = job.qualifications || [];
+          
+          if (this.filterCriteria.nursingQualification && 
+              qualifications.some(q => q.toLowerCase().includes('nursing'))) {
+            matchesQualifications = true;
+          }
+          if (this.filterCriteria.medicalQualification && 
+              (qualifications.some(q => q.toLowerCase().includes('medical')) || 
+               qualifications.some(q => q.toLowerCase().includes('surgical')))) {
+            matchesQualifications = true;
+          }
+          if (this.filterCriteria.nvqQualification && 
+              (qualifications.some(q => q.toLowerCase().includes('nvq')) || 
+               qualifications.some(q => q.toLowerCase().includes('health and social care')))) {
+            matchesQualifications = true;
+          }
+        }
+        
+        // Driving License filter
+        let matchesDrivingLicense = true;
+        if (this.filterCriteria.drivingLicense) {
+          const drivingValue = job.drivingLicense;
+          if (this.filterCriteria.drivingLicense === 'true') {
+            matchesDrivingLicense = drivingValue === true || drivingValue === 'yes' || drivingValue === 'true';
+          } else if (this.filterCriteria.drivingLicense === 'false') {
+            matchesDrivingLicense = drivingValue === false || drivingValue === 'no' || drivingValue === 'false' || !drivingValue;
+          }
+        }
+        
+        // Salary Range filter
+        let matchesSalary = true;
+        if (this.filterCriteria.salaryMin && !isNaN(parseInt(this.filterCriteria.salaryMin))) {
+          // Check both single salary value and salaryMax fields
+          matchesSalary = (job.salary && job.salary >= parseInt(this.filterCriteria.salaryMin)) || 
+                          (job.salaryMax && job.salaryMax >= parseInt(this.filterCriteria.salaryMin));
+        }
+        if (this.filterCriteria.salaryMax && !isNaN(parseInt(this.filterCriteria.salaryMax))) {
+          // Check both single salary value and salaryMin fields
+          matchesSalary = matchesSalary && 
+                          ((job.salary && job.salary <= parseInt(this.filterCriteria.salaryMax)) || 
+                           (job.salaryMin && job.salaryMin <= parseInt(this.filterCriteria.salaryMax)));
+        }
+        
+        // Location filter - uses text input for partial matches
+        const matchesLocation = !this.filterCriteria.location || 
+          (job.location || '').toLowerCase().includes(this.filterCriteria.location.toLowerCase());
+        
+        return matchesSearch && matchesJobType && matchesQualifications && 
+               matchesDrivingLicense && matchesSalary && matchesLocation;
+      });
+      
+      console.log('Filtered jobs count:', this.filteredJobs.length);
+    },
     
     resetFilters() {
       this.searchQuery = '';
@@ -463,19 +469,21 @@ export default {
       this.filterJobs();
     },
     
-    formatSalary(min, max) {
-    // First check if there's a direct salary property (from the backend)
-    if (this.selectedJob && this.selectedJob.salary) {
-      return `£${this.selectedJob.salary.toLocaleString()} ${this.formatSalaryPeriod(this.selectedJob.salaryPeriod)}`;
-    }
-    
-    // Fall back to min/max logic
-    if (!min && !max) return 'Salary not specified';
-    if (min && !max) return `£${min.toLocaleString()} and above`;
-    if (!min && max) return `Up to £${max.toLocaleString()}`;
-    return `£${min.toLocaleString()} - £${max.toLocaleString()}`;
+    formatSalary(job) {
+      // For direct salary value (matches the design in the screenshot)
+      if (job.salary !== undefined && job.salary !== null) {
+        let period = (job.salaryPeriod || 'weekly').toLowerCase();
+        if (period === 'week') period = 'weekly';
+        return `£${job.salary.toLocaleString()} per ${period}`;
+      }
+      
+      // Fall back to min/max logic
+      if (!job.salaryMin && !job.salaryMax) return 'Salary not specified';
+      if (job.salaryMin && !job.salaryMax) return `£${job.salaryMin.toLocaleString()} and above`;
+      if (!job.salaryMin && job.salaryMax) return `Up to £${job.salaryMax.toLocaleString()}`;
+      return `£${job.salaryMin.toLocaleString()} - £${job.salaryMax.toLocaleString()}`;
     },
-
+    
     formatJobType(type) {
       if (!type) return 'Not specified';
       
@@ -486,24 +494,17 @@ export default {
       return formatted.split(' ')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
-      },
-
-    // Add this helper method to format salary period
-    formatSalaryPeriod(period) {
-      const periods = {
-        'hourly': 'per hour',
-        'daily': 'per day',
-        'weekly': 'per week',
-        'monthly': 'per month',
-        'yearly': 'per year'
-      };
-      return periods[period] || '';
     },
     
     formatDate(dateString) {
       if (!dateString) return 'Date not available';
       const date = new Date(dateString);
-      return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      // Format as "5 Apr 2025" to match the screenshot
+      return date.toLocaleDateString('en-GB', { 
+        day: 'numeric', 
+        month: 'short', 
+        year: 'numeric' 
+      });
     },
     
     formatText(text) {
@@ -519,53 +520,52 @@ export default {
       }
       return text;
     },
-
+    
     formatRequirementsList(requirements) {
-  if (!requirements) return [];
-  
-  let requirementsArray = [];
-  
-  try {
-    // Check if requirements is already a string representation of an array
-    if (typeof requirements === 'string') {
-      if (requirements.trim().startsWith('[')) {
-        // It's a JSON string - parse it
-        requirementsArray = JSON.parse(requirements);
-      } else {
-        // It's a regular string - split by commas
-        requirementsArray = requirements.split(',').map(item => item.trim());
+      if (!requirements) return [];
+      
+      let requirementsArray = [];
+      
+      try {
+        // Check if requirements is already a string representation of an array
+        if (typeof requirements === 'string') {
+          if (requirements.trim().startsWith('[')) {
+            // It's a JSON string - parse it
+            requirementsArray = JSON.parse(requirements);
+          } else {
+            // It's a regular string - split by commas
+            requirementsArray = requirements.split(',').map(item => item.trim());
+          }
+        } else if (Array.isArray(requirements)) {
+          // It's already an array
+          requirementsArray = requirements;
+        }
+      } catch (e) {
+        // If parsing fails, use it as is or empty array
+        console.error('Error parsing requirements:', e);
+        return [];
       }
-    } else if (Array.isArray(requirements)) {
-      // It's already an array
-      requirementsArray = requirements;
-    }
-  } catch (e) {
-    // If parsing fails, use it as is or empty array
-    console.error('Error parsing requirements:', e);
-    return [];
-  }
-  
-  // Format each requirement
-  return requirementsArray.map(req => {
-    // Handle if requirement is not a string
-    if (typeof req !== 'string') {
-      return String(req);
-    }
+      
+      // Format each requirement
+      return requirementsArray.map(req => {
+        // Handle if requirement is not a string
+        if (typeof req !== 'string') {
+          return String(req);
+        }
+        
+        // Remove quotes if present
+        let formatted = req.replace(/^"|"$/g, '');
+        
+        // Replace underscores with spaces
+        formatted = formatted.replace(/_/g, ' ');
+        
+        // Capitalize first letter of each word
+        return formatted.split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+      });
+    },
     
-    // Remove quotes if present
-    let formatted = req.replace(/^"|"$/g, '');
-    
-    // Replace underscores with spaces
-    formatted = formatted.replace(/_/g, ' ');
-    
-    // Capitalize first letter of each word
-    return formatted.split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  });
-},
-    
-    // Add this method to update the modal display
     async showJobDetails(job) {
       console.log('Showing details for job:', job.title);
       
@@ -592,8 +592,6 @@ export default {
       this.router.push({ name: 'ApplyJob', params: { id: job._id } });
     }
   },
-
-  
   mounted() {
     console.log('JobSearch component mounted');
     this.fetchJobs();
@@ -620,427 +618,10 @@ export default {
   font-weight: 600;
 }
 
-.retry-button,
-.reset-button {
-  margin-top: 15px;
-  padding: 8px 20px;
-  background: #4299e1;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s;
-}
-
-.retry-button:hover,
-.reset-button:hover {
-  background: #3182ce;
-}
-
-/* Job cards */
-.job-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.job-card {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-  overflow: hidden;
-  transition: all 0.3s;
-}
-
-.job-card:hover {
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  transform: translateY(-3px);
-}
-
-.job-card-content {
-  display: flex;
-  padding: 15px;
-}
-
-.job-info-section {
-  flex: 1;
-  padding-right: 15px;
-}
-
-.job-title {
-  margin: 0 0 10px 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
-  /* Add a bit of ellipsis handling for long titles */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-}
-
-.job-company {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 15px;
-  font-size: 14px;
-  color: #666;
-}
-
-.job-location {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.location-icon {
-  color: #4299e1;
-}
-
-.job-requirements {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  margin-bottom: 15px;
-}
-
-.requirement-tag {
-  padding: 4px 8px;
-  background: #f0f9ff;
-  color: #3182ce;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.job-description {
-  margin-bottom: 15px;
-  font-size: 14px;
-  color: #555;
-  line-height: 1.5;
-}
-
-.job-description p {
-  margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.job-meta {
-  display: flex;
-  gap: 20px;
-}
-
-.meta-item {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 14px;
-  color: #666;
-}
-
-.salary-icon,
-.date-icon {
-  font-size: 16px;
-}
-
-.job-action-section {
-  flex: 0 0 150px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  justify-content: center;
-}
-
-.view-job-btn,
-.apply-btn {
-  width: 100%;
-  padding: 8px 0;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.2s;
-  text-align: center;
-}
-
-.view-job-btn {
-  background: #f0f9ff;
-  color: #3182ce;
-  border: 1px solid #bee3f8;
-}
-
-.view-job-btn:hover {
-  background: #e6f7ff;
-}
-
-.apply-btn {
-  background: #4299e1;
-  color: white;
-}
-
-.apply-btn:hover {
-  background: #3182ce;
-}
-
-/* Job Details Modal Styles */
-.job-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  padding: 20px;
-}
-
-.job-modal-content {
-  background-color: white;
-  border-radius: 8px;
-  max-width: 800px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-}
-
-.job-modal-additional-requirements {
-  margin-top: 20px;
-}
-
-.additional-requirements-title {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 10px;
-}
-
-.requirements-list {
-  padding-left: 20px;
-  list-style-type: disc;
-}
-
-.requirement-item {
-  margin-bottom: 10px;
-  line-height: 1.4;
-}
-
-.close-modal-button {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: none;
-  border: none;
-  font-size: 20px;
-  color: #64748b;
-  cursor: pointer;
-  z-index: 10;
-  width: 30px;
-  height: 30px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: all 0.2s;
-}
-
-.close-modal-button:hover {
-  background-color: #f1f5f9;
-  color: #334155;
-}
-
-.job-modal-header {
-  padding: 25px;
-  border-bottom: 1px solid #e2e8f0;
-  background-color: #f8fafc;
-}
-
-.job-modal-title {
-  margin: 0 0 8px 0;
-  font-size: 24px;
-  font-weight: 600;
-  color: #1e293b;
-}
-
-.job-modal-company {
-  font-size: 18px;
-  color: #64748b;
-  margin-bottom: 8px;
-}
-
-.job-modal-location {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 15px;
-  color: #64748b;
-  margin: 0;
-}
-
-.job-modal-body {
-  padding: 25px;
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-}
-
-.job-modal-section {
-  margin-bottom: 10px;
-}
-
-.job-modal-section-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1e293b;
-  margin: 0 0 15px 0;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.job-modal-salary {
-  font-size: 18px;
-  font-weight: 500;
-  color: #4299e1;
-}
-
-.job-modal-description {
-  font-size: 15px;
-  line-height: 1.6;
-  color: #334155;
-  white-space: pre-line;
-}
-
-.job-modal-requirements {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
-}
-
-.job-modal-detail-item {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.detail-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #64748b;
-}
-
-.detail-value {
-  font-size: 16px;
-  font-weight: 500;
-  color: #334155;
-}
-
-.job-modal-list {
-  list-style-type: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 10px;
-}
-
-.job-modal-list li {
-  padding: 8px 12px;
-  background-color: #f1f5f9;
-  border-radius: 6px;
-  color: #334155;
-  font-size: 14px;
-}
-
-.job-modal-contact {
-  margin: 0 0 10px 0;
-  font-size: 15px;
-  color: #334155;
-}
-
-.contact-label {
-  font-weight: 500;
-  color: #64748b;
-  margin-right: 8px;
-}
-
-.job-modal-footer {
-  padding: 20px 25px;
-  border-top: 1px solid #e2e8f0;
-  background-color: #f8fafc;
-}
-
-.apply-button-large {
-  width: 100%;
-  background-color: #4299e1;
-  color: white;
-  border: none;
-  padding: 12px;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.apply-button-large:hover {
-  background-color: #3182ce;
-}
-
-/* Responsive styles */
-@media (max-width: 768px) {
-  .search-results-layout {
-    flex-direction: column;
-  }
-  
-  .filters-column {
-    position: static;
-    width: 100%;
-    margin-bottom: 20px;
-  }
-  
-  .job-card-content {
-    flex-direction: column;
-  }
-  
-  .job-action-section {
-    flex: 0;
-    flex-direction: row;
-    margin-top: 15px;
-  }
-  
-  .view-job-btn,
-  .apply-btn {
-    width: auto;
-    padding: 8px 15px;
-  }
-  
-  .job-modal-requirements,
-  .job-modal-list {
-    grid-template-columns: 1fr;
-  }
-}
-
 .subtitle {
   color: #666;
   font-size: 16px;
   margin: 0 0 30px 0;
-  text-align: center;
 }
 
 /* Layout */
@@ -1093,21 +674,6 @@ export default {
 .search-input:focus, .filter-input:focus {
   outline: none;
   border-color: #4299e1;
-}
-
-/* Salary inputs */
-.range-filter {
-  width: 100%;
-}
-
-.range-inputs {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.salary-input {
-  flex: 1;
 }
 
 /* Filter sections */
@@ -1237,6 +803,21 @@ export default {
   background: white;
 }
 
+/* Salary inputs */
+.range-filter {
+  width: 100%;
+}
+
+.range-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.salary-input {
+  flex: 1;
+}
+
 /* Reset filters button */
 .reset-filters-btn {
   width: 100%;
@@ -1328,5 +909,420 @@ export default {
   margin: 0 0 10px 0;
   font-size: 18px;
   font-weight: 600;
+}
+
+.retry-button,
+.reset-button {
+  margin-top: 15px;
+  padding: 8px 20px;
+  background: #4299e1;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.retry-button:hover,
+.reset-button:hover {
+  background: #3182ce;
+}
+
+/* Job cards */
+.job-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.job-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.job-card:hover {
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  transform: translateY(-3px);
+}
+
+.job-card-content {
+  display: flex;
+  padding: 15px;
+}
+
+.job-info-section {
+  flex: 1;
+  padding-right: 15px;
+}
+
+.job-title {
+  margin: 0 0 10px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  /* Add a bit of ellipsis handling for long titles */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.job-company {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #666;
+}
+
+.job-location {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.location-icon {
+  color: #4299e1;
+}
+
+/* Job type tag - matches your screenshot */
+.job-type-tag {
+  display: inline-block;
+  background-color: #e0f0ff;
+  color: #0077cc;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+.job-description {
+  margin-bottom: 15px;
+  font-size: 14px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.job-description p {
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Job meta information (salary, date, etc) */
+.job-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 15px;
+  align-items: center;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.meta-item .icon {
+  margin-right: 6px;
+  font-size: 0.9rem;
+}
+
+.job-action-section {
+  flex: 0 0 130px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+}
+
+.view-job-btn,
+.apply-btn {
+  width: 100%;
+  padding: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.view-job-btn {
+  background: #f0f9ff;
+  color: #3182ce;
+  border: 1px solid #bee3f8;
+}
+
+.view-job-btn:hover {
+  background: #e6f7ff;
+}
+
+.apply-btn {
+  background: #4299e1;
+  color: white;
+}
+
+.apply-btn:hover {
+  background: #3182ce;
+}
+
+/* Job Details Modal Styles */
+.job-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.job-modal-content {
+  background-color: white;
+  border-radius: 8px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.close-modal-button {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #64748b;
+  cursor: pointer;
+  z-index: 10;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.close-modal-button:hover {
+  background-color: #f1f5f9;
+  color: #334155;
+}
+
+.job-modal-header {
+  padding: 25px;
+  border-bottom: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+}
+
+.job-modal-title {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.job-modal-company {
+  font-size: 18px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.job-modal-location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  color: #64748b;
+  margin: 0;
+}
+
+.job-modal-body {
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.job-modal-section {
+  margin-bottom: 10px;
+}
+
+.job-modal-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 15px 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.job-modal-salary {
+  font-size: 18px;
+  font-weight: 500;
+  color: #4299e1;
+}
+
+.job-modal-description {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #334155;
+  white-space: pre-line;
+}
+
+.job-modal-requirements {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.job-modal-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.detail-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.detail-value {
+  font-size: 16px;
+  font-weight: 500;
+  color: #334155;
+}
+
+.job-modal-additional-requirements {
+  margin-top: 20px;
+}
+
+.additional-requirements-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.requirements-list {
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.requirement-item {
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+.job-modal-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.job-modal-list li {
+  padding: 8px 12px;
+  background-color: #f1f5f9;
+  border-radius: 6px;
+  color: #334155;
+  font-size: 14px;
+}
+
+.job-modal-contact {
+  margin: 0 0 10px 0;
+  font-size: 15px;
+  color: #334155;
+}
+
+.contact-label {
+  font-weight: 500;
+  color: #64748b;
+  margin-right: 8px;
+}
+
+.job-modal-footer {
+  padding: 20px 25px;
+  border-top: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+}
+
+.apply-button-large {
+  width: 100%;
+  background-color: #4299e1;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.apply-button-large:hover {
+  background-color: #3182ce;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .search-results-layout {
+    flex-direction: column;
+  }
+  
+  .filters-column {
+    position: static;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  .job-card-content {
+    flex-direction: column;
+  }
+  
+  .job-action-section {
+    flex: 0;
+    flex-direction: row;
+    margin-top: 15px;
+  }
+  
+  .view-job-btn,
+  .apply-btn {
+    width: auto;
+    padding: 8px 15px;
+  }
+  
+  .job-modal-requirements,
+  .job-modal-list {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
