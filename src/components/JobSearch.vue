@@ -42,27 +42,6 @@
         </div>
         
         <div class="filter-section">
-          <h3 class="filter-heading">Experience Level</h3>
-          <div class="checkbox-filters">
-            <label class="checkbox-label">
-              <input type="checkbox" v-model="filterCriteria.entryLevel" @change="filterJobs">
-              <span class="custom-checkbox"></span>
-              Entry Level
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" v-model="filterCriteria.intermediate" @change="filterJobs">
-              <span class="custom-checkbox"></span>
-              Intermediate
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" v-model="filterCriteria.expert" @change="filterJobs">
-              <span class="custom-checkbox"></span>
-              Expert
-            </label>
-          </div>
-        </div>
-        
-        <div class="filter-section">
           <h3 class="filter-heading">Qualifications</h3>
           <div class="checkbox-filters">
             <label class="checkbox-label">
@@ -192,12 +171,16 @@
                   </span>
                 </div>
 
-                <!-- Display job requirements as tags -->
+                <!-- Update the job-requirements section in the job card -->
                 <div class="job-requirements">
-                  <span v-if="job.jobType" class="requirement-tag">{{ job.jobType }}</span>
+                  <span v-if="job.jobType || job.employmentType" class="requirement-tag">
+                    {{ formatJobType(job.jobType || job.employmentType) }}
+                  </span>
                   <span v-if="job.experienceLevel" class="requirement-tag">{{ job.experienceLevel }}</span>
                   <span v-if="job.drivingLicense" class="requirement-tag">Driving License Required</span>
-                  <span v-for="(qualification, index) in job.qualifications" :key="index" class="requirement-tag">{{ formatText(qualification) }}</span>
+                  <span v-for="(qualification, index) in job.qualifications" :key="index" class="requirement-tag">
+                    {{ formatText(qualification) }}
+                  </span>
                 </div>
                 
                 <!-- Job Description -->
@@ -245,7 +228,16 @@
           <!-- Salary section -->
           <div class="job-modal-section">
             <h3 class="job-modal-section-title">Salary</h3>
-            <p class="job-modal-salary">{{ formatSalary(selectedJob.salaryMin, selectedJob.salaryMax) }}</p>
+            <p class="job-modal-salary">
+              <!-- First check for single salary value -->
+              <span v-if="selectedJob.salary">
+                £{{ selectedJob.salary.toLocaleString() }} {{ formatSalaryPeriod(selectedJob.salaryPeriod) }}
+              </span>
+              <!-- Fall back to min/max if no single salary -->
+              <span v-else>
+                {{ formatSalary(selectedJob.salaryMin, selectedJob.salaryMax) }}
+              </span>
+            </p>
           </div>
           
           <!-- Description section -->
@@ -260,18 +252,28 @@
             <div class="job-modal-requirements">
               <div class="job-modal-detail-item">
                 <div class="detail-label">Job Type</div>
-                <div class="detail-value">{{ selectedJob.jobType }}</div>
+                <div class="detail-value">{{ formatJobType(selectedJob.jobType || selectedJob.employmentType) }}</div>
               </div>
               <div class="job-modal-detail-item">
                 <div class="detail-label">Experience Level</div>
-                <div class="detail-value">{{ selectedJob.experienceLevel }}</div>
+                <div class="detail-value">{{ selectedJob.experienceLevel || 'Not specified' }}</div>
               </div>
               <div class="job-modal-detail-item">
                 <div class="detail-label">Driving License</div>
                 <div class="detail-value">{{ selectedJob.drivingLicense ? 'Required' : 'Not Required' }}</div>
               </div>
-            </div>
           </div>
+              
+              <!-- Add list of requirements if present with more spacing -->
+          <div v-if="selectedJob.requirements && selectedJob.requirements.length > 0" class="job-modal-additional-requirements">
+            <h4 class="additional-requirements-title">Additional Requirements</h4>
+            <ul class="requirements-list">
+              <li v-for="(req, index) in formatRequirementsList(selectedJob.requirements)" :key="index" class="requirement-item">
+                {{ req }}
+              </li>
+            </ul>
+          </div>
+        </div>
           
           <!-- Qualifications section -->
           <div class="job-modal-section" v-if="selectedJob.qualifications && selectedJob.qualifications.length > 0">
@@ -293,19 +295,18 @@
             </ul>
           </div>
           
-          <!-- Contact section -->
+          <!-- Replace the Contact Information section to use employer email -->
           <div class="job-modal-section">
             <h3 class="job-modal-section-title">Contact Information</h3>
             <p class="job-modal-contact">
               <span class="contact-label">Email:</span>
-              <span class="contact-value">{{ selectedJob.contactEmail || 'Not provided' }}</span>
+              <span class="contact-value">{{ selectedJob.employerEmail || selectedJob.contactEmail || 'Not provided' }}</span>
             </p>
             <p class="job-modal-contact" v-if="selectedJob.contactPhone">
               <span class="contact-label">Phone:</span>
               <span class="contact-value">{{ selectedJob.contactPhone }}</span>
             </p>
           </div>
-        </div>
         
         <div class="job-modal-footer">
           <button class="apply-button-large" @click="applyForJob(selectedJob)">
@@ -314,6 +315,7 @@
         </div>
       </div>
     </div>
+  </div>
   </div>
 </template>
 
@@ -336,9 +338,6 @@ export default {
       error: null,
       jobTypeFilter: 'any',
       filterCriteria: {
-        entryLevel: false,
-        intermediate: false,
-        expert: false,
         nursingQualification: false,
         medicalQualification: false,
         nvqQualification: false,
@@ -386,100 +385,62 @@ export default {
     },
     
     filterJobs() {
-      console.log('Filtering jobs with search query:', this.searchQuery);
-      console.log('Filter criteria:', this.filterCriteria);
-      
-      this.filteredJobs = this.jobs.filter(job => {
-        // Search by title or location (case insensitive)
-        const searchTerm = this.searchQuery.toLowerCase().trim();
-        const jobTitle = (job.title || '').toLowerCase();
-        const jobLocation = (job.location || '').toLowerCase();
-        const jobCompany = (job.company || '').toLowerCase();
-        
-        // Check if search term is found in title, location, or company
-        const matchesSearch = this.searchQuery === '' || 
-          jobTitle.includes(searchTerm) || 
-          jobLocation.includes(searchTerm) || 
-          jobCompany.includes(searchTerm);
-        
-        // Job Type filter
-        const matchesJobType = this.jobTypeFilter === 'any' || 
-          job.jobType === this.jobTypeFilter;
-        
-        // Experience Level filter
-        let matchesExperience = true;
-        if (this.filterCriteria.entryLevel || this.filterCriteria.intermediate || 
-            this.filterCriteria.expert) {
-          matchesExperience = false;
-          const exp = job.experienceLevel || '';
-          
-          if (this.filterCriteria.entryLevel && 
-              exp.toLowerCase().includes('entry')) {
-            matchesExperience = true;
-          }
-          if (this.filterCriteria.intermediate && 
-              exp.toLowerCase().includes('intermediate')) {
-            matchesExperience = true;
-          }
-          if (this.filterCriteria.expert && 
-              exp.toLowerCase().includes('expert')) {
-            matchesExperience = true;
-          }
-        }
-        
-        // Qualifications filter
-        let matchesQualifications = true;
-        if (this.filterCriteria.nursingQualification || this.filterCriteria.medicalQualification || 
-            this.filterCriteria.nvqQualification) {
-          matchesQualifications = false;
-          const qualifications = job.qualifications || [];
-          
-          if (this.filterCriteria.nursingQualification && 
-              qualifications.some(q => q.toLowerCase().includes('nursing'))) {
-            matchesQualifications = true;
-          }
-          if (this.filterCriteria.medicalQualification && 
-              (qualifications.some(q => q.toLowerCase().includes('medical')) || 
-               qualifications.some(q => q.toLowerCase().includes('surgical')))) {
-            matchesQualifications = true;
-          }
-          if (this.filterCriteria.nvqQualification && 
-              (qualifications.some(q => q.toLowerCase().includes('nvq')) || 
-               qualifications.some(q => q.toLowerCase().includes('health and social care')))) {
-            matchesQualifications = true;
-          }
-        }
-        
-        // Driving License filter
-        let matchesDrivingLicense = true;
-        if (this.filterCriteria.drivingLicense) {
-          const drivingValue = job.drivingLicense;
-          if (this.filterCriteria.drivingLicense === 'true') {
-            matchesDrivingLicense = drivingValue === true || drivingValue === 'yes' || drivingValue === 'true';
-          } else if (this.filterCriteria.drivingLicense === 'false') {
-            matchesDrivingLicense = drivingValue === false || drivingValue === 'no' || drivingValue === 'false' || !drivingValue;
-          }
-        }
-        
-        // Salary Range filter
-        let matchesSalary = true;
-        if (this.filterCriteria.salaryMin && !isNaN(parseInt(this.filterCriteria.salaryMin))) {
-          matchesSalary = matchesSalary && job.salaryMax >= parseInt(this.filterCriteria.salaryMin);
-        }
-        if (this.filterCriteria.salaryMax && !isNaN(parseInt(this.filterCriteria.salaryMax))) {
-          matchesSalary = matchesSalary && job.salaryMin <= parseInt(this.filterCriteria.salaryMax);
-        }
-        
-        // Location filter - uses text input for partial matches
-        const matchesLocation = !this.filterCriteria.location || 
-          (job.location || '').toLowerCase().includes(this.filterCriteria.location.toLowerCase());
-        
-        return matchesSearch && matchesJobType && matchesExperience && 
-               matchesQualifications && matchesDrivingLicense && matchesSalary && matchesLocation;
-      });
-      
-      console.log('Filtered jobs count:', this.filteredJobs.length);
-    },
+  console.log('Filtering jobs with search query:', this.searchQuery);
+  console.log('Filter criteria:', this.filterCriteria);
+  
+  this.filteredJobs = this.jobs.filter(job => {
+    // Search by title or location (case insensitive)
+    const searchTerm = this.searchQuery.toLowerCase().trim();
+    const jobTitle = (job.title || '').toLowerCase();
+    const jobLocation = (job.location || '').toLowerCase();
+    const jobCompany = (job.company || '').toLowerCase();
+    
+    // Check if search term is found in title, location, or company
+    const matchesSearch = this.searchQuery === '' || 
+      jobTitle.includes(searchTerm) || 
+      jobLocation.includes(searchTerm) || 
+      jobCompany.includes(searchTerm);
+    
+    // Job Type filter
+    const matchesJobType = this.jobTypeFilter === 'any' || 
+      job.jobType === this.jobTypeFilter || 
+      job.employmentType === this.jobTypeFilter;
+    
+    // Driving License filter
+    let matchesDrivingLicense = true;
+    if (this.filterCriteria.drivingLicense) {
+      const drivingValue = job.drivingLicense;
+      if (this.filterCriteria.drivingLicense === 'true') {
+        matchesDrivingLicense = drivingValue === true || drivingValue === 'yes' || drivingValue === 'true';
+      } else if (this.filterCriteria.drivingLicense === 'false') {
+        matchesDrivingLicense = drivingValue === false || drivingValue === 'no' || drivingValue === 'false' || !drivingValue;
+      }
+    }
+    
+    // Salary Range filter
+    let matchesSalary = true;
+    if (this.filterCriteria.salaryMin && !isNaN(parseInt(this.filterCriteria.salaryMin))) {
+      // Check both single salary value and salaryMax fields
+      matchesSalary = (job.salary && job.salary >= parseInt(this.filterCriteria.salaryMin)) || 
+                      (job.salaryMax && job.salaryMax >= parseInt(this.filterCriteria.salaryMin));
+    }
+    if (this.filterCriteria.salaryMax && !isNaN(parseInt(this.filterCriteria.salaryMax))) {
+      // Check both single salary value and salaryMin fields
+      matchesSalary = matchesSalary && 
+                      ((job.salary && job.salary <= parseInt(this.filterCriteria.salaryMax)) || 
+                       (job.salaryMin && job.salaryMin <= parseInt(this.filterCriteria.salaryMax)));
+    }
+    
+    // Location filter - uses text input for partial matches
+    const matchesLocation = !this.filterCriteria.location || 
+      (job.location || '').toLowerCase().includes(this.filterCriteria.location.toLowerCase());
+    
+    return matchesSearch && matchesJobType && matchesDrivingLicense && 
+           matchesSalary && matchesLocation;
+  });
+  
+  console.log('Filtered jobs count:', this.filteredJobs.length);
+},
     
     resetFilters() {
       this.searchQuery = '';
@@ -503,10 +464,40 @@ export default {
     },
     
     formatSalary(min, max) {
-      if (!min && !max) return 'Salary not specified';
-      if (min && !max) return `£${min.toLocaleString()} and above`;
-      if (!min && max) return `Up to £${max.toLocaleString()}`;
-      return `£${min.toLocaleString()} - £${max.toLocaleString()}`;
+    // First check if there's a direct salary property (from the backend)
+    if (this.selectedJob && this.selectedJob.salary) {
+      return `£${this.selectedJob.salary.toLocaleString()} ${this.formatSalaryPeriod(this.selectedJob.salaryPeriod)}`;
+    }
+    
+    // Fall back to min/max logic
+    if (!min && !max) return 'Salary not specified';
+    if (min && !max) return `£${min.toLocaleString()} and above`;
+    if (!min && max) return `Up to £${max.toLocaleString()}`;
+    return `£${min.toLocaleString()} - £${max.toLocaleString()}`;
+    },
+
+    formatJobType(type) {
+      if (!type) return 'Not specified';
+      
+      // Replace underscores with spaces
+      let formatted = type.replace(/_/g, ' ');
+      
+      // Capitalize first letter of each word
+      return formatted.split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+      },
+
+    // Add this helper method to format salary period
+    formatSalaryPeriod(period) {
+      const periods = {
+        'hourly': 'per hour',
+        'daily': 'per day',
+        'weekly': 'per week',
+        'monthly': 'per month',
+        'yearly': 'per year'
+      };
+      return periods[period] || '';
     },
     
     formatDate(dateString) {
@@ -528,10 +519,66 @@ export default {
       }
       return text;
     },
+
+    formatRequirementsList(requirements) {
+  if (!requirements) return [];
+  
+  let requirementsArray = [];
+  
+  try {
+    // Check if requirements is already a string representation of an array
+    if (typeof requirements === 'string') {
+      if (requirements.trim().startsWith('[')) {
+        // It's a JSON string - parse it
+        requirementsArray = JSON.parse(requirements);
+      } else {
+        // It's a regular string - split by commas
+        requirementsArray = requirements.split(',').map(item => item.trim());
+      }
+    } else if (Array.isArray(requirements)) {
+      // It's already an array
+      requirementsArray = requirements;
+    }
+  } catch (e) {
+    // If parsing fails, use it as is or empty array
+    console.error('Error parsing requirements:', e);
+    return [];
+  }
+  
+  // Format each requirement
+  return requirementsArray.map(req => {
+    // Handle if requirement is not a string
+    if (typeof req !== 'string') {
+      return String(req);
+    }
     
-    showJobDetails(job) {
+    // Remove quotes if present
+    let formatted = req.replace(/^"|"$/g, '');
+    
+    // Replace underscores with spaces
+    formatted = formatted.replace(/_/g, ' ');
+    
+    // Capitalize first letter of each word
+    return formatted.split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  });
+},
+    
+    // Add this method to update the modal display
+    async showJobDetails(job) {
       console.log('Showing details for job:', job.title);
-      this.selectedJob = job;
+      
+      try {
+        // Fetch the full job details to ensure we have all information
+        const response = await apiClient.get(`/jobs/${job._id}`);
+        this.selectedJob = response.data;
+      } catch (err) {
+        console.error('Error fetching complete job details:', err);
+        // Fallback to the job data we already have
+        this.selectedJob = job;
+      }
+      
       document.body.style.overflow = 'hidden'; // Prevent scrolling when modal is open
     },
     
@@ -545,6 +592,8 @@ export default {
       this.router.push({ name: 'ApplyJob', params: { id: job._id } });
     }
   },
+
+  
   mounted() {
     console.log('JobSearch component mounted');
     this.fetchJobs();
@@ -766,6 +815,26 @@ export default {
   display: flex;
   flex-direction: column;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.job-modal-additional-requirements {
+  margin-top: 20px;
+}
+
+.additional-requirements-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.requirements-list {
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.requirement-item {
+  margin-bottom: 10px;
+  line-height: 1.4;
 }
 
 .close-modal-button {
