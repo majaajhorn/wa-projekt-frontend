@@ -317,7 +317,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import apiClient from '../api/axios';
 
 export default {
   name: 'BrowseCarers',
@@ -360,11 +360,7 @@ export default {
         }
         
         // Fetch data from API
-        const response = await axios.get('http://localhost:5000/auth/carers', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+        const response = await apiClient.get('/auth/carers');
         
         console.log('API Response:', response.data);
         
