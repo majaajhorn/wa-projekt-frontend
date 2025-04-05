@@ -1,11 +1,5 @@
-import axios from 'axios';
-
-const apiClient = axios.create({
-  baseURL: 'http://localhost:5000', // Replace with your backend URL
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+// Import your existing apiClient instead of creating a new axios instance
+import apiClient from '../api/axios';
 
 // Function to handle login
 export const loginUser = async ({ email, password, role }) => {

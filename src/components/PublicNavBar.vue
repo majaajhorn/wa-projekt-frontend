@@ -2,7 +2,7 @@
     <nav class="navbar">
       <div class="navbar-logo">
         <router-link to="/">
-          <img src="/public/carematch_logo.png" alt="CareMatch Logo" class="logo-image">
+          <img src="/carematch_logo.png" alt="CareMatch Logo" class="logo-image">
         </router-link>
       </div>
       

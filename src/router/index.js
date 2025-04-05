@@ -12,6 +12,8 @@ import EditJob from '../components/EditJob.vue';
 import JobDetails from '../components/JobDetails.vue';
 import About from '../components/About.vue';
 import BrowseCarers from '../components/BrowseCarers.vue';
+import ApplicationDetails from '../components/ApplicationDetails.vue';
+import ApplyJob from '../components/ApplyJob.vue';
 
 const routes = [
   { path: '/', component: Home },
@@ -26,15 +28,11 @@ const routes = [
   { path: '/edit-job/:id', component: EditJob, meta: { requiresAuth: true, employerOnly: true } },
   { path: '/job-details/:id', component: JobDetails, meta: { requiresAuth: true } },
   { path: '/about', component: About }, // No auth required
+  { path: '/application-details/:id', component: ApplicationDetails, meta: { requiresAuth: true } },
+  { path: '/apply-job/:id', component: ApplyJob, meta: { requiresAuth: true } },
   
   // Modified BrowseCarers route to handle both public and authenticated access
-  { 
-    path: '/browse-carers', 
-    component: BrowseCarers, 
-    meta: { 
-      requiresAuthForEmployers: true // Custom flag for our route guard
-    } 
-  },
+  { path: '/browse-carers', component: BrowseCarers, meta: { requiresAuthForEmployers: true } },
 ];
 
 const router = createRouter({
