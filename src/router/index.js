@@ -14,6 +14,7 @@ import About from '../components/About.vue';
 import BrowseCarers from '../components/BrowseCarers.vue';
 import ApplicationDetails from '../components/ApplicationDetails.vue';
 import ApplyJob from '../components/ApplyJob.vue';
+import AllApplications from '../components/AllApplications.vue'
 
 const routes = [
   { path: '/', component: Home },
@@ -33,6 +34,8 @@ const routes = [
   
   // Modified BrowseCarers route to handle both public and authenticated access
   { path: '/browse-carers', component: BrowseCarers, meta: { requiresAuthForEmployers: true } },
+  { path: '/all-applications', name: 'AllApplications', component: AllApplications, meta: { requiresAuth: true, employerOnly: true } },
+  
 ];
 
 const router = createRouter({
