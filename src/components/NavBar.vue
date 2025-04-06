@@ -12,6 +12,8 @@
       >
         {{ userRole === 'employer' ? 'Browse Carers' : 'Browse Jobs' }}
       </router-link>
+
+      <NotificationBell v-if="isLoggedIn" />
       
       <router-link to="/my-profile" class="nav-link">
         My Profile
@@ -43,17 +45,24 @@
 <script>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import NotificationBell from './NotificationBell.vue';
 
 export default {
   name: 'NavBar',
+  components: {
+    NotificationBell
+  },
   setup() {
     const router = useRouter();
     const userRole = ref('');
     const showConfirmation = ref(false);
+    const isLoggedIn = ref(false);
     
     onMounted(() => {
       // Get user role from localStorage
       userRole.value = localStorage.getItem('userRole') || 'jobseeker';
+      // Check if user is logged in
+      isLoggedIn.value = !!localStorage.getItem('token');
     });
     
     const confirmSignOut = () => {
@@ -73,12 +82,16 @@ export default {
       // Close the confirmation modal
       showConfirmation.value = false;
       
+      // Update login state
+      isLoggedIn.value = false;
+      
       // Redirect to home/login page
       router.push('/');
     };
     
     return {
       userRole,
+      isLoggedIn,
       showConfirmation,
       confirmSignOut,
       cancelSignOut,

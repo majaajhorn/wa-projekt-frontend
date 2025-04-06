@@ -589,7 +589,7 @@ export default {
     
     applyForJob(job) {
       // Navigate to the apply job page with the job ID
-      this.router.push({ name: 'ApplyJob', params: { id: job._id } });
+      this.router.push(`/apply-job/${job._id}`);
     }
   },
   mounted() {

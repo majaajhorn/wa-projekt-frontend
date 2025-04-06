@@ -29,7 +29,7 @@ const routes = [
   { path: '/job-details/:id', component: JobDetails, meta: { requiresAuth: true } },
   { path: '/about', component: About }, // No auth required
   { path: '/application-details/:id', component: ApplicationDetails, meta: { requiresAuth: true } },
-  { path: '/apply-job/:id', component: ApplyJob, meta: { requiresAuth: true } },
+  { path: '/apply-job/:id', component: ApplyJob, meta: { requiresAuth: true, roles: ['jobseeker'] } },
   
   // Modified BrowseCarers route to handle both public and authenticated access
   { path: '/browse-carers', component: BrowseCarers, meta: { requiresAuthForEmployers: true } },

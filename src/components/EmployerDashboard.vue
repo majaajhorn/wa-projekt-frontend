@@ -12,8 +12,8 @@
         <p class="stat-number">{{ totalApplications }}</p>
       </div>
       <div class="stat-card">
-        <h3>New Messages</h3>
-        <p class="stat-number">{{ unreadMessages }}</p>
+        <h3>New Applications</h3>
+        <p class="stat-number">{{ newApplicationsCount }}</p>
       </div>
     </div>
     
@@ -26,6 +26,49 @@
       <router-link to="/my-profile" class="action-btn">
         <span>View My Profile</span>
       </router-link>
+    </div>
+    
+    <!-- Recent Applications Section -->
+    <div v-if="recentApplications.length > 0" class="recent-applications-section">
+      <div class="section-header">
+        <h2>Recent Applications</h2>
+        <router-link to="/all-applications" class="view-all-link">
+          View All
+        </router-link>
+      </div>
+      
+      <div class="application-listings">
+        <div 
+          v-for="application in recentApplications" 
+          :key="application._id" 
+          class="application-card"
+        >
+          <div class="application-header">
+            <div class="application-job-title">{{ application.job?.title }}</div>
+            <div class="application-status" :class="application.status.toLowerCase()">
+              {{ application.status }}
+            </div>
+          </div>
+          <div class="applicant-info">
+            <h4 class="applicant-name">{{ application.applicant?.firstName }} {{ application.applicant?.lastName }}</h4>
+            <p class="applicant-email">✉️ {{ application.applicant?.email }}</p>
+            <p v-if="application.applicant?.phone" class="applicant-phone">📞 {{ application.applicant?.phone }}</p>
+          </div>
+          <div class="application-meta">
+            <p class="application-date">Applied: {{ formatDate(application.appliedDate) }}</p>
+          </div>
+          <div class="application-actions">
+            <router-link :to="`/application-details/${application._id}`" class="action-link view">
+              View Application
+            </router-link>
+            <div class="status-actions" v-if="application.status === 'Pending'">
+              <button @click="updateApplicationStatus(application._id, 'Reviewed')" class="action-link review">
+                Mark as Reviewed
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     
     <div class="my-jobs-section">
@@ -86,12 +129,17 @@
             </span>
             <span class="stat-item">
               <span class="stat-label">Applications:</span>
-              {{ job.applications ? job.applications.length : 0 }}
+              <span :class="{'highlight': job.applications && job.applications.length > 0}">
+                {{ job.applications ? job.applications.length : 0 }}
+              </span>
             </span>
           </div>
           <div class="job-actions" @click.stop>
             <router-link :to="`/job-applications/${job._id}`" class="action-link">
               View Applications
+              <span v-if="job.applications && job.applications.length > 0" class="application-badge">
+                {{ job.applications.length }}
+              </span>
             </router-link>
             <router-link :to="`/edit-job/${job._id}`" class="action-link">
               Edit
@@ -136,9 +184,11 @@ export default {
     const filterStatus = ref('all');
     const activeJobsCount = ref(0);
     const totalApplications = ref(0);
-    const unreadMessages = ref(0); // Set to 0 by default instead of random
+    const newApplicationsCount = ref(0);
     const showDeleteModal = ref(false);
     const jobToDelete = ref(null);
+    const recentApplications = ref([]);
+    const loadingApplications = ref(false);
 
     // Filter jobs based on status
     const filteredJobs = computed(() => {
@@ -163,9 +213,6 @@ export default {
         totalApplications.value = jobs.value.reduce((total, job) => 
           total + (job.applications ? job.applications.length : 0), 0);
         
-        // Messages count is now fixed at 0 until messaging is implemented
-        // unreadMessages.value = 0; // Already set to 0 on initialization
-        
         loading.value = false;
       } catch (error) {
         console.error('Error fetching jobs:', error);
@@ -173,8 +220,60 @@ export default {
       }
     };
 
+    // Fetch recent applications
+    const fetchRecentApplications = async () => {
+      try {
+        loadingApplications.value = true;
+        
+        const response = await apiClient.get('/applications/employer-applications');
+        
+        // Sort by date (newest first) and take the top 3
+        const sortedApplications = response.data.sort((a, b) => {
+          return new Date(b.appliedDate) - new Date(a.appliedDate);
+        });
+        
+        recentApplications.value = sortedApplications.slice(0, 3);
+        
+        // Count new (pending) applications
+        newApplicationsCount.value = response.data.filter(app => app.status === 'Pending').length;
+        
+        loadingApplications.value = false;
+      } catch (error) {
+        console.error('Error fetching applications:', error);
+        loadingApplications.value = false;
+      }
+    };
+
+    // Update application status
+    const updateApplicationStatus = async (applicationId, newStatus) => {
+      try {
+        const response = await apiClient.put(`/applications/${applicationId}/status`, {
+          status: newStatus
+        });
+        
+        if (response.status === 200) {
+          // Update the application status in the local array
+          const application = recentApplications.value.find(app => app._id === applicationId);
+          if (application) {
+            application.status = newStatus;
+          }
+          
+          // Update new applications count
+          newApplicationsCount.value = Math.max(0, newApplicationsCount.value - 1);
+          
+          // Show success message
+          alert('Application status updated successfully');
+        }
+      } catch (error) {
+        console.error('Error updating application status:', error);
+        alert('Failed to update application status. Please try again.');
+      }
+    };
+
     // Format date for display
     const formatDate = (dateString) => {
+      if (!dateString) return 'N/A';
+      
       const date = new Date(dateString);
       return date.toLocaleDateString('en-GB', { 
         day: 'numeric', 
@@ -263,9 +362,10 @@ export default {
       }
     };
 
-    // Fetch jobs when component is mounted
+    // Fetch jobs and applications when component is mounted
     onMounted(() => {
       fetchJobs();
+      fetchRecentApplications();
     });
 
     return {
@@ -275,22 +375,168 @@ export default {
       filteredJobs,
       activeJobsCount,
       totalApplications,
-      unreadMessages,
+      newApplicationsCount,
       showDeleteModal,
       jobToDelete,
+      recentApplications,
+      loadingApplications,
       formatDate,
       formatEmploymentType,
       formatSalaryPeriod,
       viewJobDetails,
       toggleJobStatus,
       confirmDeleteJob,
-      deleteJob
+      deleteJob,
+      updateApplicationStatus
     };
   }
 };
 </script>
   
 <style scoped>
+.recent-applications-section {
+  margin-bottom: 30px;
+}
+
+.view-all-link {
+  color: #4299e1;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.view-all-link:hover {
+  text-decoration: underline;
+}
+
+.application-listings {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 15px;
+}
+
+.application-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.application-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.application-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.application-job-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: #2d3748;
+}
+
+.application-status {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.application-status.pending {
+  background-color: #fefcbf;
+  color: #744210;
+}
+
+.application-status.reviewed {
+  background-color: #bee3f8;
+  color: #2b6cb0;
+}
+
+.application-status.interviewing {
+  background-color: #c6f6d5;
+  color: #2f855a;
+}
+
+.application-status.hired {
+  background-color: #9ae6b4;
+  color: #22543d;
+}
+
+.application-status.rejected {
+  background-color: #fed7d7;
+  color: #c53030;
+}
+
+.applicant-info {
+  margin-bottom: 15px;
+}
+
+.applicant-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0 0 8px 0;
+}
+
+.applicant-email, .applicant-phone {
+  font-size: 14px;
+  color: #718096;
+  margin: 0 0 4px 0;
+}
+
+.application-meta {
+  font-size: 13px;
+  color: #718096;
+  margin-bottom: 15px;
+}
+
+.application-date {
+  margin: 0;
+}
+
+.application-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.action-link.view {
+  background-color: #ebf8ff;
+  color: #3182ce;
+}
+
+.action-link.review {
+  background-color: #e6fffa;
+  color: #2c7a7b;
+}
+
+.highlight {
+  color: #4299e1;
+  font-weight: 600;
+}
+
+.application-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #4299e1;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 12px;
+  margin-left: 5px;
+  font-weight: 600;
+}
+
 .dashboard-container {
   max-width: 1000px;
   margin: 0 auto;
