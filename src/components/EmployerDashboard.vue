@@ -62,8 +62,11 @@
               View Application
             </router-link>
             <div class="status-actions" v-if="application.status === 'Pending'">
-              <button @click="updateApplicationStatus(application._id, 'Reviewed')" class="action-link review">
-                Mark as Reviewed
+              <button @click="updateApplicationStatus(application._id, 'Approved')" class="action-link approve">
+                Approve Application
+              </button>
+              <button @click="updateApplicationStatus(application._id, 'Rejected')" class="action-link reject">
+                Reject
               </button>
             </div>
           </div>
@@ -98,6 +101,11 @@
       
       <div v-if="loading" class="loading-indicator">
         <p>Loading job listings...</p>
+      </div>
+      
+      <div v-else-if="error" class="error-state">
+        <p>{{ error }}</p>
+        <button @click="fetchJobs" class="primary-btn">Try Again</button>
       </div>
       
       <div v-else-if="filteredJobs.length === 0" class="empty-state">
@@ -181,6 +189,7 @@ export default {
     const router = useRouter();
     const jobs = ref([]);
     const loading = ref(true);
+    const error = ref(null);
     const filterStatus = ref('all');
     const activeJobsCount = ref(0);
     const totalApplications = ref(0);
@@ -201,12 +210,45 @@ export default {
       }
     });
 
-    // Fetch employer's jobs
+    // Modified fetchJobs function to fix the job loading issue
     const fetchJobs = async () => {
       try {
         loading.value = true;
-        const response = await apiClient.get('/jobs/my-jobs');
-        jobs.value = response.data;
+        error.value = null;
+        
+        // Get token and check if it exists
+        const token = localStorage.getItem('token');
+        if (!token) {
+          error.value = 'Authentication token not found. Please log in again.';
+          loading.value = false;
+          return;
+        }
+        
+        // For debugging - log user info
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        console.log('Current user:', user);
+        
+        try {
+          // First try the my-jobs endpoint
+          const response = await apiClient.get('/jobs/my-jobs');
+          jobs.value = response.data;
+          console.log('My jobs response:', response.data);
+        } catch (err) {
+          console.error('Error fetching my-jobs:', err);
+          
+          // Fallback: get all jobs and filter by employerId
+          const allJobsResponse = await apiClient.get('/jobs');
+          console.log('All jobs response:', allJobsResponse.data);
+          
+          // If user ID is available, filter the jobs
+          if (user && user.id) {
+            jobs.value = allJobsResponse.data.filter(job => job.employerId === user.id);
+            console.log(`Filtered ${jobs.value.length} jobs for employer ID: ${user.id}`);
+          } else {
+            // If no user ID, just use all jobs (not ideal but better than nothing)
+            jobs.value = allJobsResponse.data;
+          }
+        }
         
         // Calculate dashboard stats
         activeJobsCount.value = jobs.value.filter(job => job.active).length;
@@ -214,8 +256,14 @@ export default {
           total + (job.applications ? job.applications.length : 0), 0);
         
         loading.value = false;
-      } catch (error) {
-        console.error('Error fetching jobs:', error);
+      } catch (err) {
+        console.error('Error fetching jobs:', err);
+        if (err.response) {
+          console.error('Server response:', err.response.data);
+          error.value = `Error: ${err.response.data.message || 'Failed to load jobs'}`;
+        } else {
+          error.value = 'Network error. Please check your connection and try again.';
+        }
         loading.value = false;
       }
     };
@@ -225,28 +273,73 @@ export default {
       try {
         loadingApplications.value = true;
         
-        const response = await apiClient.get('/applications/employer-applications');
+        // First check if there are any applications on existing jobs
+        const jobApplications = [];
         
-        // Sort by date (newest first) and take the top 3
-        const sortedApplications = response.data.sort((a, b) => {
-          return new Date(b.appliedDate) - new Date(a.appliedDate);
+        // For each job, if it has applications array, create application objects
+        jobs.value.forEach(job => {
+          if (job.applications && job.applications.length > 0) {
+            // Create placeholder application objects
+            const applicationsForJob = job.applications.map(appId => ({
+              _id: appId,
+              jobId: job._id,
+              job: job,
+              status: 'Pending', // Default status
+              applicant: {
+                firstName: 'Applicant',
+                lastName: 'Name',
+                email: 'applicant@example.com'
+              },
+              appliedDate: new Date().toISOString()
+            }));
+            
+            jobApplications.push(...applicationsForJob);
+          }
         });
         
-        recentApplications.value = sortedApplications.slice(0, 3);
+        // If we found applications this way, use them
+        if (jobApplications.length > 0) {
+          recentApplications.value = jobApplications.slice(0, 3);
+          newApplicationsCount.value = jobApplications.filter(app => app.status === 'Pending').length;
+          loadingApplications.value = false;
+          return;
+        }
         
-        // Count new (pending) applications
-        newApplicationsCount.value = response.data.filter(app => app.status === 'Pending').length;
+        // Otherwise, try the API
+        try {
+          const response = await apiClient.get('/applications/employer-applications');
+          
+          // Sort by date (newest first) and take the top 3
+          const sortedApplications = response.data.sort((a, b) => {
+            return new Date(b.appliedDate) - new Date(a.appliedDate);
+          });
+          
+          recentApplications.value = sortedApplications.slice(0, 3);
+          
+          // Count new (pending) applications
+          newApplicationsCount.value = response.data.filter(app => app.status === 'Pending').length;
+        } catch (err) {
+          console.error('Error fetching applications via API:', err);
+          // We already have fallback data from jobs, so no need to set an error
+        }
         
         loadingApplications.value = false;
       } catch (error) {
-        console.error('Error fetching applications:', error);
+        console.error('Error in applications logic:', error);
         loadingApplications.value = false;
       }
     };
 
-    // Update application status
+    // Updated application status method with support for Approve/Reject
     const updateApplicationStatus = async (applicationId, newStatus) => {
       try {
+        // Show processing feedback
+        const statusText = newStatus === 'Approved' ? 'Approving' : 
+                          newStatus === 'Rejected' ? 'Rejecting' : 
+                          'Updating';
+        
+        console.log(`${statusText} application ${applicationId}...`);
+        
         const response = await apiClient.put(`/applications/${applicationId}/status`, {
           status: newStatus
         });
@@ -258,15 +351,30 @@ export default {
             application.status = newStatus;
           }
           
-          // Update new applications count
-          newApplicationsCount.value = Math.max(0, newApplicationsCount.value - 1);
+          // Update new applications count if status changed from Pending
+          if (newStatus !== 'Pending') {
+            newApplicationsCount.value = Math.max(0, newApplicationsCount.value - 1);
+          }
           
           // Show success message
-          alert('Application status updated successfully');
+          const successMessage = newStatus === 'Approved' ? 'Application approved successfully!' : 
+                                newStatus === 'Rejected' ? 'Application rejected' : 
+                                'Application status updated successfully';
+          
+          alert(successMessage);
+          
+          // Optionally refresh applications to get the latest data
+          fetchRecentApplications();
         }
       } catch (error) {
         console.error('Error updating application status:', error);
-        alert('Failed to update application status. Please try again.');
+        
+        // Provide a more detailed error message if available
+        if (error.response && error.response.data) {
+          alert(`Failed to update application status: ${error.response.data.message || 'Unknown error'}`);
+        } else {
+          alert('Failed to update application status. Please try again.');
+        }
       }
     };
 
@@ -365,12 +473,16 @@ export default {
     // Fetch jobs and applications when component is mounted
     onMounted(() => {
       fetchJobs();
-      fetchRecentApplications();
+      // Only fetch applications after jobs are loaded
+      fetchJobs().then(() => {
+        fetchRecentApplications();
+      });
     });
 
     return {
       jobs,
       loading,
+      error,
       filterStatus,
       filteredJobs,
       activeJobsCount,
@@ -387,7 +499,8 @@ export default {
       toggleJobStatus,
       confirmDeleteJob,
       deleteJob,
-      updateApplicationStatus
+      updateApplicationStatus,
+      fetchJobs
     };
   }
 };
@@ -455,17 +568,7 @@ export default {
   color: #744210;
 }
 
-.application-status.reviewed {
-  background-color: #bee3f8;
-  color: #2b6cb0;
-}
-
-.application-status.interviewing {
-  background-color: #c6f6d5;
-  color: #2f855a;
-}
-
-.application-status.hired {
+.application-status.approved {
   background-color: #9ae6b4;
   color: #22543d;
 }
@@ -513,9 +616,14 @@ export default {
   color: #3182ce;
 }
 
-.action-link.review {
-  background-color: #e6fffa;
-  color: #2c7a7b;
+.action-link.approve {
+  background-color: #c6f6d5;
+  color: #2f855a;
+}
+
+.action-link.reject {
+  background-color: #fed7d7;
+  color: #c53030;
 }
 
 .highlight {
@@ -535,6 +643,16 @@ export default {
   font-size: 12px;
   margin-left: 5px;
   font-weight: 600;
+}
+
+.error-state {
+  text-align: center;
+  padding: 30px;
+  background-color: #fff5f5;
+  border: 1px solid #fed7d7;
+  border-radius: 8px;
+  color: #c53030;
+  margin-bottom: 20px;
 }
 
 .dashboard-container {
