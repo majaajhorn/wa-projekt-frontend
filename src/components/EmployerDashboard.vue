@@ -29,7 +29,7 @@
     </div>
     
     <!-- Recent Applications Section -->
-    <div v-if="recentApplications.length > 0" class="recent-applications-section">
+    <div v-if="visibleApplications.length > 0" class="recent-applications-section">
       <div class="section-header">
         <h2>Recent Applications</h2>
         <router-link to="/all-applications" class="view-all-link">
@@ -39,7 +39,7 @@
       
       <div class="application-listings">
         <div 
-          v-for="application in recentApplications" 
+          v-for="application in visibleApplications" 
           :key="application._id" 
           class="application-card"
         >
@@ -197,7 +197,7 @@ export default {
     const newApplicationsCount = ref(0);
     const showDeleteModal = ref(false);
     const jobToDelete = ref(null);
-    const recentApplications = ref([]);
+    const allApplications = ref([]); // Store all applications before filtering
     const loadingApplications = ref(false);
 
     // Filter jobs based on status
@@ -209,6 +209,17 @@ export default {
       } else {
         return jobs.value.filter(job => !job.active);
       }
+    });
+
+    // Changed to computed property: Filter applications to exclude rejected ones
+    const visibleApplications = computed(() => {
+      // Filter out rejected applications
+      const nonRejected = allApplications.value.filter(app => app.status !== 'Rejected');
+      
+      // Sort by date (newest first) and take max 3
+      return nonRejected
+        .sort((a, b) => new Date(b.appliedDate) - new Date(a.appliedDate))
+        .slice(0, 3);
     });
 
     // Modified fetchJobs function to fix the job loading issue
@@ -287,12 +298,11 @@ export default {
               // Convert from object to array
               const savedApps = Object.values(parsed);
               
-              // Sort by date and take most recent 3
-              const sortedApps = savedApps.sort((a, b) => 
-                new Date(b.appliedDate) - new Date(a.appliedDate)
-              );
+              // Filter out rejected applications when loading from localStorage
+              const nonRejectedApps = savedApps.filter(app => app.status !== 'Rejected');
               
-              recentApplications.value = sortedApps.slice(0, 3);
+              // Set to raw applications array (visibleApplications computed property will handle filtering)
+              allApplications.value = savedApps;
               
               // Count pending applications
               newApplicationsCount.value = savedApps.filter(app => app.status === 'Pending').length;
@@ -365,12 +375,8 @@ export default {
               console.warn('Error merging localStorage data:', mergeError);
             }
             
-            // Sort by date (newest first) and take the top 3
-            const sortedApplications = apiApps.sort((a, b) => {
-              return new Date(b.appliedDate) - new Date(a.appliedDate);
-            });
-            
-            recentApplications.value = sortedApplications.slice(0, 3);
+            // Store all applications in the ref
+            allApplications.value = apiApps;
             
             // Count new (pending) applications
             newApplicationsCount.value = apiApps.filter(app => app.status === 'Pending').length;
@@ -443,12 +449,10 @@ export default {
         
         // If we found applications this way, use them
         if (jobApplications.length > 0) {
-          // Sort by date (newest first)
-          const sortedApplications = jobApplications.sort((a, b) => {
-            return new Date(b.appliedDate) - new Date(a.appliedDate);
-          });
+          // Store all applications (visibleApplications computed prop will handle filtering)
+          allApplications.value = jobApplications;
           
-          recentApplications.value = sortedApplications.slice(0, 3);
+          // Count pending applications
           newApplicationsCount.value = jobApplications.filter(app => app.status === 'Pending').length;
         }
       }
@@ -456,8 +460,9 @@ export default {
 
     const updateApplicationStatus = async (applicationId, newStatus) => {
       try {
-        // Important: Update the UI FIRST before making API call
-        const application = recentApplications.value.find(app => app._id === applicationId);
+        // Find the application in our local array
+        const application = allApplications.value.find(app => app._id === applicationId);
+        
         if (application) {
           // Store previous status
           const previousStatus = application.status;
@@ -512,8 +517,6 @@ export default {
             }
           } catch (apiError) {
             console.error('API error when updating status:', apiError);
-            // NOTE: We DON'T revert the UI because we want the user to see their changes
-            // The localStorage data still reflects what the user wanted
             
             // Show error message
             if (apiError.response && apiError.response.data) {
@@ -647,7 +650,8 @@ export default {
       newApplicationsCount,
       showDeleteModal,
       jobToDelete,
-      recentApplications,
+      allApplications,
+      visibleApplications, // Use the computed property instead of recentApplications
       loadingApplications,
       formatDate,
       formatEmploymentType,
