@@ -228,7 +228,15 @@
       
       // Go back to dashboard
       const goBack = () => {
-        router.push('/jobseeker-dashboard');
+        // Get user role from localStorage
+        const userRole = localStorage.getItem('userRole') || '';
+        
+        // Redirect to the appropriate dashboard based on role
+        if (userRole === 'employer') {
+          router.push('/employer-dashboard');
+        } else {
+          router.push('/jobseeker-dashboard');
+        }
       };
       
       // Show withdraw confirmation modal
