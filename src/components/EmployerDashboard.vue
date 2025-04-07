@@ -143,7 +143,7 @@
             </span>
           </div>
           <div class="job-actions" @click.stop>
-            <router-link :to="`/job-applications/${job._id}`" class="action-link">
+            <router-link :to="'/all-applications'" class="action-link">
               View Applications
               <span v-if="job.applications && job.applications.length > 0" class="application-badge">
                 {{ job.applications.length }}
