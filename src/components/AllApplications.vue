@@ -110,255 +110,211 @@
       
       <div class="back-link-container">
         <router-link to="/employer-dashboard" class="back-link">Back to Dashboard</router-link>
-        <button @click="fetchApplications" class="refresh-btn">
-  Refresh Data
-</button>
       </div>
     </div>
   </template>
   
   <script>
-import { ref, computed, onMounted } from 'vue';
-import apiClient from '../api/axios.js';
-
-export default {
-  name: 'AllApplications',
-  setup() {
-    const applications = ref([]);
-    const loading = ref(true);
-    const error = ref(null);
-    const statusFilter = ref('all');
-    const sortBy = ref('newest');
-    
-    // Helper to get applicant name consistently
-    const getApplicantName = (application) => {
-      // First try to get from applicant object
-      if (application.applicant?.fullName) {
-        return `${application.applicant.fullName}`;
-      }
+  import { ref, computed, onMounted } from 'vue';
+  import apiClient from '../api/axios.js';
+  
+  export default {
+    name: 'AllApplications',
+    setup() {
+      const applications = ref([]);
+      const loading = ref(true);
+      const error = ref(null);
+      const statusFilter = ref('all');
+      const sortBy = ref('newest');
       
-      // Next try applicantName field
-      if (application.applicantName) {
-        return application.applicantName;
-      }
-      
-      // Return placeholders only if no real data available
-      return application.realName || "Applicant Name";
-    };
-    
-    // Helper to get applicant email consistently
-    const getApplicantEmail = (application) => {
-      // Try direct applicant email
-      if (application.applicant?.email) {
-        return application.applicant.email;
-      }
-      
-      // Try applicantEmail field
-      if (application.applicantEmail) {
-        return application.applicantEmail;
-      }
-      
-      // Return placeholder only if no real data available
-      return application.realEmail || "applicant@example.com";
-    };
-    
-    // Get CSS class for status badges
-    const getStatusClass = (status) => {
-      switch (status) {
-        case 'Pending': return 'pending';
-        case 'Hired': return 'approved'; 
-        case 'Rejected': return 'rejected';
-        default: return 'pending';
-      }
-    };
-    
-    // Get display text for status
-    const getStatusDisplay = (status) => {
-      switch (status) {
-        case 'Hired': return 'Approved';
-        default: return status;
-      }
-    };
-    
-    // Format date for display
-    const formatDate = (dateString) => {
-      if (!dateString) return 'N/A';
-      
-      const date = new Date(dateString);
-      return date.toLocaleDateString('en-GB', { 
-        day: 'numeric', 
-        month: 'short', 
-        year: 'numeric' 
-      });
-    };
-    
-    // Get applications from localStorage
-    const getLocalApplications = () => {
-      try {
-        const stored = localStorage.getItem('applicationData');
-        if (stored) {
-          const data = JSON.parse(stored);
-          // Convert object to array
-          return Object.values(data);
+      // Helper to get applicant name consistently
+      const getApplicantName = (application) => {
+        // First check if we have the fullName field directly
+        if (application.applicant?.fullName) {
+          return application.applicant.fullName;
         }
-      } catch (e) {
-        console.error('Error getting applications from localStorage:', e);
-      }
-      return [];
-    };
-
-    // Helper function to update localStorage with fresh API data
-    const updateLocalApplications = (apiApps) => {
-      try {
-        const appMap = {};
-        apiApps.forEach(app => {
-          if (app._id) {
-            appMap[app._id] = app;
-          }
+        
+        // Then try to get from firstName and lastName
+        if (application.applicant?.firstName && application.applicant?.lastName) {
+          return `${application.applicant.firstName} ${application.applicant.lastName}`;
+        }
+        
+        // Try the direct applicantName field
+        if (application.applicantName) {
+          return application.applicantName;
+        }
+        
+        // Try to extract name from MongoDB IDs if we can find a way
+        if (application.applicantId) {
+          return `Applicant (ID: ${application.applicantId.substring(0, 6)}...)`;
+        }
+        
+        // Return placeholders only if no real data available
+        return "Unknown Applicant";
+      };
+      
+      // Helper to get applicant email consistently
+      const getApplicantEmail = (application) => {
+        // Try direct applicant email
+        if (application.applicant?.email) {
+          return application.applicant.email;
+        }
+        
+        // Try applicantEmail field
+        if (application.applicantEmail) {
+          return application.applicantEmail;
+        }
+        
+        // Return placeholder only if no real data available
+        return application.realEmail || "applicant@example.com";
+      };
+      
+      // Get CSS class for status badges
+      const getStatusClass = (status) => {
+        switch (status) {
+          case 'Pending': return 'pending';
+          case 'Hired': return 'approved'; 
+          case 'Rejected': return 'rejected';
+          default: return 'pending';
+        }
+      };
+      
+      // Get display text for status
+      const getStatusDisplay = (status) => {
+        switch (status) {
+          case 'Hired': return 'Approved';
+          default: return status;
+        }
+      };
+      
+      // Format date for display
+      const formatDate = (dateString) => {
+        if (!dateString) return 'N/A';
+        
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-GB', { 
+          day: 'numeric', 
+          month: 'short', 
+          year: 'numeric' 
         });
-        localStorage.setItem('applicationData', JSON.stringify(appMap));
-      } catch (e) {
-        console.error('Error updating localStorage:', e);
-      }
-    };
-    
-    // Computed property for filtered applications
-    const filteredApplications = computed(() => {
-      // First filter by status
-      let filtered = applications.value;
+      };
       
-      if (statusFilter.value !== 'all') {
-        filtered = applications.value.filter(app => app.status === statusFilter.value);
-      }
+      // Get applications from localStorage first to show most current data
+      const getLocalApplications = () => {
+        try {
+          const stored = localStorage.getItem('applicationData');
+          if (stored) {
+            const data = JSON.parse(stored);
+            // Convert object to array
+            return Object.values(data);
+          }
+        } catch (e) {
+          console.error('Error getting applications from localStorage:', e);
+        }
+        return [];
+      };
       
-      // Then sort
-      return sortFiltered(filtered);
-    });
-    
-    // Function to sort applications based on the current sort criteria
-    const sortFiltered = (apps) => {
-      switch (sortBy.value) {
-        case 'newest':
-          return [...apps].sort((a, b) => new Date(b.appliedDate) - new Date(a.appliedDate));
-        case 'oldest':
-          return [...apps].sort((a, b) => new Date(a.appliedDate) - new Date(b.appliedDate));
-        case 'jobTitle':
-          return [...apps].sort((a, b) => {
-            const titleA = a.job?.title || a.jobTitle || '';
-            const titleB = b.job?.title || b.jobTitle || '';
-            return titleA.localeCompare(titleB);
-          });
-        default:
-          return apps;
-      }
-    };
-    
-    // Fetch all applications with priority on API data
-const fetchApplications = async () => {
+      // Computed property for filtered applications
+      const filteredApplications = computed(() => {
+        // First filter by status
+        let filtered = applications.value;
+        
+        if (statusFilter.value !== 'all') {
+          filtered = applications.value.filter(app => app.status === statusFilter.value);
+        }
+        
+        // Then sort
+        return sortFiltered(filtered);
+      });
+      
+      // Function to sort applications based on the current sort criteria
+      const sortFiltered = (apps) => {
+        switch (sortBy.value) {
+          case 'newest':
+            return [...apps].sort((a, b) => new Date(b.appliedDate) - new Date(a.appliedDate));
+          case 'oldest':
+            return [...apps].sort((a, b) => new Date(a.appliedDate) - new Date(b.appliedDate));
+          case 'jobTitle':
+            return [...apps].sort((a, b) => {
+              const titleA = a.job?.title || a.jobTitle || '';
+              const titleB = b.job?.title || b.jobTitle || '';
+              return titleA.localeCompare(titleB);
+            });
+          default:
+            return apps;
+        }
+      };
+      
+      // Fetch all applications with multiple sources
+      const fetchApplications = async () => {
   try {
-    // Clear localStorage immediately to ensure fresh data
-    localStorage.removeItem('applicationData');
-    
     loading.value = true;
     error.value = null;
     
-    // Try API sources first
-    try {
-      // Try employer-applications endpoint
-      const response = await apiClient.get('/applications/employer-applications');
-      
-      // If that fails, try alternative endpoint format
-      if (!response.data || response.data.length === 0) {
-        try {
-          const altResponse = await apiClient.get('/applications/all');
-          if (altResponse.data && Array.isArray(altResponse.data) && altResponse.data.length > 0) {
-            console.log('Got applications from alternative API:', altResponse.data);
-            applications.value = altResponse.data;
-          }
-        } catch (altError) {
-          console.error('Alternative endpoint also failed:', altError);
-        }
-      } else {
-        console.log('Got applications from API:', response.data);
-        
-        // Process API data
-        const apiApplications = response.data.map(app => ({
-          ...app,
-          job: app.job || { title: 'Unknown Job' },
-          applicant: app.applicant || { 
-            firstName: 'Unknown', 
-            lastName: 'Applicant',
-            email: 'unknown@example.com'
-          }
-        }));
-        
-        applications.value = apiApplications;
-      }
-    } catch (apiError) {
-      console.error('Error fetching applications from API:', apiError);
-      
-      // Use fallback data if needed
-      applications.value = [
-        {
-          _id: '1',
-          job: { title: 'Experienced with stroke' },
-          applicant: { 
-            firstName: 'John', 
-            lastName: 'Doe',
-            email: 'applicant@example.com'
-          },
-          status: 'Rejected',
-          appliedDate: new Date('2025-04-06').toISOString()
-        },
-        {
-          _id: '2',
-          job: { title: 'Live in Carer' },
-          applicant: { 
-            firstName: 'Jane', 
-            lastName: 'Smith',
-            email: 'applicant@example.com'
-          },
-          status: 'Hired',
-          appliedDate: new Date('2025-04-06').toISOString()
-        }
-      ];
+    console.log('Attempting to fetch applications...');
+    
+    // Make sure this matches your backend route structure
+    // If your server expects /api/applications/employer-applications
+    const response = await apiClient.get('/applications/employer-applications');
+    
+    console.log('API response received:', response.data);
+    
+    if (response.data && Array.isArray(response.data)) {
+      applications.value = response.data;
+      console.log('Applications loaded:', applications.value.length);
+    } else {
+      console.warn('API returned empty or invalid data');
+      error.value = 'No applications found';
     }
     
-    loading.value = false;
   } catch (err) {
-    console.error('Error in fetchApplications:', err);
+    console.error('Error fetching applications:', err);
     error.value = 'Failed to load applications. Please try again.';
+  } finally {
     loading.value = false;
   }
 };
-    
-    // Clear cache and reload data
-    const clearCache = () => {
-      localStorage.removeItem('applicationData');
-      alert('Cache cleared!');
-      fetchApplications();
-    };
-    
-    // Update application status in UI and localStorage
-    const updateApplicationStatus = async (applicationId, newStatus) => {
-      try {
-        // Find application
-        const application = applications.value.find(app => app._id === applicationId);
-        if (!application) {
-          alert('Could not find application.');
-          return;
-        }
+      
+      // Helper function to merge applications from API and localStorage
+      const mergeApplications = (apiApps, localApps) => {
+        // Create a map of application IDs to applications
+        const appMap = {};
         
-        // Try to update on server first
+        // First add all API applications
+        apiApps.forEach(app => {
+          appMap[app._id] = app;
+        });
+        
+        // Then override with any local applications with the same ID
+        localApps.forEach(app => {
+          if (app._id) {
+            appMap[app._id] = {
+              ...appMap[app._id] || {},  // Keep original data if exists
+              ...app,                    // Override with local data
+              // Ensure we keep the applicant info if available
+              applicant: app.applicant || (appMap[app._id] ? appMap[app._id].applicant : null)
+            };
+          }
+        });
+        
+        // Convert back to array
+        return Object.values(appMap);
+      };
+      
+      // Update application status in UI and localStorage
+      const updateApplicationStatus = async (applicationId, newStatus) => {
         try {
-          await apiClient.put(`/applications/${applicationId}/status`, {
-            status: newStatus
-          });
+          // Find application
+          const application = applications.value.find(app => app._id === applicationId);
+          if (!application) {
+            alert('Could not find application.');
+            return;
+          }
           
           // Update status in UI
           application.status = newStatus;
           
-          // Update in localStorage to stay in sync
+          // Save to localStorage
           try {
             let stored = localStorage.getItem('applicationData') || '{}';
             stored = JSON.parse(stored);
@@ -374,68 +330,56 @@ const fetchApplications = async () => {
             console.error('Error saving to localStorage:', storageError);
           }
           
-          const message = newStatus === 'Hired' ? 'Application approved successfully!' : 
-                        newStatus === 'Rejected' ? 'Application rejected' : 
-                        `Application status updated to ${newStatus}`;
-                        
-          alert(message);
-        } catch (apiError) {
-          console.error('Error updating status on server:', apiError);
-          
-          // Still update UI and localStorage, but notify the user
-          application.status = newStatus;
-          
+          // Try to update on server
           try {
-            let stored = localStorage.getItem('applicationData') || '{}';
-            stored = JSON.parse(stored);
+            await apiClient.put(`/applications/${applicationId}/status`, {
+              status: newStatus
+            });
             
-            stored[applicationId] = {
-              ...application,
-              status: newStatus,
-              lastUpdate: new Date().toISOString()
-            };
+            const message = newStatus === 'Hired' ? 'Application approved successfully!' : 
+                          newStatus === 'Rejected' ? 'Application rejected' : 
+                          `Application status updated to ${newStatus}`;
+                          
+            alert(message);
+          } catch (apiError) {
+            console.error('Error updating status on server:', apiError);
             
-            localStorage.setItem('applicationData', JSON.stringify(stored));
-          } catch (storageError) {
-            console.error('Error saving to localStorage:', storageError);
+            // Show message that updates are saved locally
+            const actionMessage = newStatus === 'Hired' ? 'Application approved!' : 
+                                newStatus === 'Rejected' ? 'Application rejected' : 
+                                'Status updated';
+            
+            alert(`${actionMessage} (Note: Changes may not be saved to the server)`);
           }
-          
-          const actionMessage = newStatus === 'Hired' ? 'Application approved!' : 
-                              newStatus === 'Rejected' ? 'Application rejected' : 
-                              'Status updated';
-          
-          alert(`${actionMessage} (Note: Changes may not be saved to the server)`);
+        } catch (error) {
+          console.error('Error in updateApplicationStatus:', error);
+          alert('An unexpected error occurred. Please try again.');
         }
-      } catch (error) {
-        console.error('Error in updateApplicationStatus:', error);
-        alert('An unexpected error occurred. Please try again.');
-      }
-    };
-    
-    // Fetch applications when component is mounted
-    onMounted(() => {
-      fetchApplications();
-    });
-    
-    return {
-      applications,
-      loading,
-      error,
-      statusFilter,
-      sortBy,
-      filteredApplications,
-      getApplicantName,
-      getApplicantEmail,
-      formatDate,
-      getStatusClass,
-      getStatusDisplay,
-      updateApplicationStatus,
-      fetchApplications,
-      clearCache
-    };
-  }
-};
-</script>
+      };
+      
+      // Fetch applications when component is mounted
+      onMounted(() => {
+        fetchApplications();
+      });
+      
+      return {
+        applications,
+        loading,
+        error,
+        statusFilter,
+        sortBy,
+        filteredApplications,
+        getApplicantName,
+        getApplicantEmail,
+        formatDate,
+        getStatusClass,
+        getStatusDisplay,
+        updateApplicationStatus,
+        fetchApplications
+      };
+    }
+  };
+  </script>
   
   <style scoped>
   .all-applications-container {

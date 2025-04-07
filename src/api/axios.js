@@ -18,7 +18,7 @@ apiClient.interceptors.request.use(
         }
         
         // Example: Log outgoing requests (optional)
-        console.log(`Outgoing Request: ${config.method.toUpperCase()} ${config.url}`, config);
+        console.log(`Sending ${config.method} request to: ${config.baseURL}${config.url}`);
         
         return config;
     },
@@ -31,32 +31,19 @@ apiClient.interceptors.request.use(
 // Add interceptors for responses
 apiClient.interceptors.response.use(
     (response) => {
-        // Log the response (optional)
-        console.log(`Response:`, response);
+        // Simple logging for debugging
+        console.log(`Received response from: ${response.config.url}`, response.status);
         return response;
     },
     (error) => {
-        // Handle common error responses globally
+        // Handle common error responses
         if (error.response) {
-            const { status, data } = error.response;
-            
-            // Example: Handle 401 Unauthorized globally
-            if (status === 401) {
-                console.error('Unauthorized: Redirecting to login...');
-                // Optionally, redirect to login page
-                window.location.href = '/login';
-            }
-
-            // Example: Handle 500 Internal Server Error
-            if (status === 500) {
-                console.error('Server Error:', data?.message || 'An error occurred on the server.');
-            }
+            console.error(`API Error: ${error.response.status} from ${error.config?.url}`, 
+                         error.response.data);
         } else if (error.request) {
-            // Handle network errors
-            console.error('Network Error: No response received from server.', error.request);
+            console.error('Network Error: No response received');
         } else {
-            // Handle unexpected errors
-            console.error('Unexpected Error:', error.message);
+            console.error('Error:', error.message);
         }
 
         return Promise.reject(error);
