@@ -88,7 +88,7 @@
         </div>
         
         <div class="job-actions">
-          <router-link :to="'/all-applications'" class="action-btn">
+          <router-link :to="`/job-applications/${job._id}`" class="action-btn">
             View Applications ({{ job.applications ? job.applications.length : 0 }})
           </router-link>
           <router-link :to="`/edit-job/${job._id}`" class="action-btn">
