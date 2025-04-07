@@ -88,35 +88,17 @@
               </div>
             </div>
             
-            <div class="timeline-item" :class="{'active': application.reviewedDate}">
-              <div class="timeline-point" :class="{'active': application.reviewedDate}"></div>
+            <div class="timeline-item" :class="{'active': application.status === 'Hired' || application.status === 'Rejected'}">
+              <div class="timeline-point" :class="{'active': application.status === 'Hired' || application.status === 'Rejected'}"></div>
               <div class="timeline-content">
-                <div class="timeline-date">{{ application.reviewedDate ? formatDate(application.reviewedDate) : 'Pending' }}</div>
-                <div class="timeline-title">Application Reviewed</div>
-                <div class="timeline-description">
-                  {{ application.reviewedDate ? 'Your application has been reviewed by the employer.' : 'Waiting for the employer to review your application.' }}
+                <div class="timeline-date">
+                  {{ (application.status === 'Hired' || application.status === 'Rejected') ? formatDate(application.lastStatusUpdate) : 'Pending' }}
                 </div>
-              </div>
-            </div>
-            
-            <div class="timeline-item" :class="{'active': application.interviewDate}">
-              <div class="timeline-point" :class="{'active': application.interviewDate}"></div>
-              <div class="timeline-content">
-                <div class="timeline-date">{{ application.interviewDate ? formatDate(application.interviewDate) : 'Pending' }}</div>
-                <div class="timeline-title">Interview</div>
+                <div class="timeline-title">Application {{ application.status === 'Hired' ? 'Approved' : (application.status === 'Rejected' ? 'Rejected' : 'Decision') }}</div>
                 <div class="timeline-description">
-                  {{ application.interviewDate ? 'Interview scheduled or completed.' : 'Waiting for interview scheduling.' }}
-                </div>
-              </div>
-            </div>
-            
-            <div class="timeline-item" :class="{'active': application.decisionDate}">
-              <div class="timeline-point" :class="{'active': application.decisionDate}"></div>
-              <div class="timeline-content">
-                <div class="timeline-date">{{ application.decisionDate ? formatDate(application.decisionDate) : 'Pending' }}</div>
-                <div class="timeline-title">Final Decision</div>
-                <div class="timeline-description">
-                  {{ application.decisionDate ? `Decision: ${application.decision || 'Made'}` : 'Awaiting final decision.' }}
+                  {{ application.status === 'Hired' ? 'Your application has been approved by the employer.' : 
+                    application.status === 'Rejected' ? 'Your application has been rejected.' : 
+                    'Waiting for the employer to make a decision on your application.' }}
                 </div>
               </div>
             </div>

@@ -853,6 +853,7 @@ export default {
 .action-link.view {
   background-color: #ebf8ff;
   color: #3182ce;
+  padding: 5px
 }
 
 .action-link.approve {
