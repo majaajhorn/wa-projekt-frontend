@@ -50,8 +50,8 @@
             </div>
           </div>
           <div class="applicant-info">
-            <h4 class="applicant-name">{{ application.applicant?.firstName }} {{ application.applicant?.lastName }}</h4>
-            <p class="applicant-email">✉️ {{ application.applicant?.email }}</p>
+            <h4 class="applicant-name">{{ getApplicantName(application) }}</h4>
+            <p class="applicant-email">✉️ {{ getApplicantEmail(application) }}</p>
             <p v-if="application.applicant?.phone" class="applicant-phone">📞 {{ application.applicant?.phone }}</p>
           </div>
           <div class="application-meta">
@@ -197,7 +197,7 @@ export default {
     const newApplicationsCount = ref(0);
     const showDeleteModal = ref(false);
     const jobToDelete = ref(null);
-    const allApplications = ref([]); // Store all applications before filtering
+    const allApplications = ref([]);
     const loadingApplications = ref(false);
 
     // Filter jobs based on status
@@ -221,6 +221,33 @@ export default {
         .sort((a, b) => new Date(b.appliedDate) - new Date(a.appliedDate))
         .slice(0, 3);
     });
+
+    // Helper methods for applicant data display
+    const getApplicantName = (application) => {
+      // Check if application has an applicant object
+      if (!application || !application.applicant) return 'Unknown Applicant';
+      
+      // If the applicant has fullName, use it directly (from MongoDB format)
+      if (application.applicant.fullName) {
+        return application.applicant.fullName;
+      }
+      
+      // If the applicant has firstName and lastName, combine them
+      if (application.applicant.firstName && application.applicant.lastName) {
+        return `${application.applicant.firstName} ${application.applicant.lastName}`;
+      }
+      
+      // Fallback if neither format is available
+      return application.applicant.name || 'Unknown Applicant';
+    };
+
+    const getApplicantEmail = (application) => {
+      // Check if application has an applicant object with email
+      if (!application || !application.applicant) return 'email@example.com';
+      
+      // Return the email if it exists
+      return application.applicant.email || 'email@example.com';
+    };
 
     // Modified fetchJobs function to fix the job loading issue
     const fetchJobs = async () => {
@@ -280,12 +307,12 @@ export default {
       }
     };
 
-    // Enhanced fetchRecentApplications that uses localStorage data for EmployerDashboard.vue
+    // Enhanced fetchRecentApplications function
     const fetchRecentApplications = async () => {
       try {
         loadingApplications.value = true;
         
-        // FIRST: Check localStorage for any saved application data
+        // First check localStorage for any saved application data
         try {
           const savedData = localStorage.getItem('applicationData');
           if (savedData) {
@@ -297,9 +324,6 @@ export default {
               
               // Convert from object to array
               const savedApps = Object.values(parsed);
-              
-              // Filter out rejected applications when loading from localStorage
-              const nonRejectedApps = savedApps.filter(app => app.status !== 'Rejected');
               
               // Set to raw applications array (visibleApplications computed property will handle filtering)
               allApplications.value = savedApps;
@@ -348,9 +372,8 @@ export default {
                 ...app,
                 job: app.job || { title: 'Unknown Job' },
                 applicant: app.applicant || {
-                  firstName: 'Applicant', 
-                  lastName: 'Name',
-                  email: 'applicant@example.com'
+                  fullName: 'Unknown Applicant',
+                  email: 'email@example.com'
                 }
               };
             });
@@ -381,79 +404,132 @@ export default {
             // Count new (pending) applications
             newApplicationsCount.value = apiApps.filter(app => app.status === 'Pending').length;
             return;
+          } else {
+            throw new Error('No valid application data returned from API');
           }
         } catch (apiError) {
           console.error('Error fetching applications via API:', apiError);
-          // Continue to fallback below
-        }
-        
-        // Fallback: For each job, try to get detailed application data
-        const jobApplications = [];
-        
-        for (const job of jobs.value) {
-          if (job.applications && job.applications.length > 0) {
-            console.log(`Job ${job.title} has ${job.applications.length} applications`);
-            
-            // For each application ID, try to get application details
-            for (const appId of job.applications) {
-              try {
-                // Try to get detailed application info including applicant details
-                const appResponse = await apiClient.get(`/applications/${appId}`);
-                
-                if (appResponse.data && appResponse.data.applicant) {
-                  jobApplications.push({
-                    ...appResponse.data,
-                    job: job
-                  });
-                  console.log(`Got application details for ${appId}:`, appResponse.data);
-                } else {
-                  // Fallback to basic info if we can't get detailed applicant info
-                  jobApplications.push({
-                    _id: appId,
-                    jobId: job._id,
-                    job: job,
-                    status: 'Pending',
-                    applicant: {
-                      firstName: 'Applicant',
-                      lastName: 'Name',
-                      email: 'applicant@example.com'
-                    },
-                    appliedDate: job.postedDate || new Date().toISOString()
-                  });
-                }
-              } catch (appErr) {
-                console.error(`Could not fetch application ${appId}:`, appErr);
-              }
-            }
-          }
-        }
-        
-        // Check for any saved status updates in localStorage for the fallback data
-        try {
-          const savedData = localStorage.getItem('applicationData');
-          if (savedData) {
-            const parsed = JSON.parse(savedData);
-            
-            if (parsed && Object.keys(parsed).length > 0) {
-              for (const app of jobApplications) {
-                if (parsed[app._id]) {
-                  // Update status from localStorage
-                  app.status = parsed[app._id].status;
-                }
-              }
-            }
-          }
-        } catch (updateError) {
-          console.warn('Error updating with localStorage data:', updateError);
-        }
-        
-        // If we found applications this way, use them
-        if (jobApplications.length > 0) {
-          // Store all applications (visibleApplications computed prop will handle filtering)
-          allApplications.value = jobApplications;
           
-          // Count pending applications
-          newApplicationsCount.value = jobApplications.filter(app => app.status === 'Pending').length;
+          // Fallback: For each job, try to get detailed application data
+          const jobApplications = [];
+          
+          for (const job of jobs.value) {
+            if (job.applications && job.applications.length > 0) {
+              console.log(`Job ${job.title} has ${job.applications.length} applications`);
+              
+              // For each application ID, try to get application details
+              for (const appId of job.applications) {
+                try {
+                  // Try to get detailed application info including applicant details
+                  const appResponse = await apiClient.get(`/applications/${appId}`);
+                  
+                  if (appResponse.data) {
+                    // Get applicant data if possible
+                    let applicantData = appResponse.data.applicant;
+                    
+                    // If we have an applicantId but no applicant data, try to fetch user details
+                    if (!applicantData && appResponse.data.applicantId) {
+                      try {
+                        const userResponse = await apiClient.get(`/users/${appResponse.data.applicantId}`);
+                        if (userResponse.data) {
+                          applicantData = userResponse.data;
+                        }
+                      } catch (userErr) {
+                        console.warn(`Could not fetch user data for applicant ${appResponse.data.applicantId}:`, userErr);
+                      }
+                    }
+                    
+                    jobApplications.push({
+                      ...appResponse.data,
+                      job: job,
+                      applicant: applicantData || {
+                        fullName: 'Unknown Applicant',
+                        email: 'email@example.com'
+                      }
+                    });
+                    console.log(`Got application details for ${appId}:`, appResponse.data);
+                  } else {
+                    // Fallback to basic info if we can't get detailed info
+                    jobApplications.push({
+                      _id: appId,
+                      jobId: job._id,
+                      job: job,
+                      status: 'Pending',
+                      applicant: {
+                        fullName: 'Unknown Applicant',
+                        email: 'email@example.com'
+                      },
+                      appliedDate: job.postedDate || new Date().toISOString()
+                    });
+                  }
+                } catch (appErr) {
+                  console.error(`Could not fetch application ${appId}:`, appErr);
+                }
+              }
+            }
+          }
+          
+          // Check for any saved status updates in localStorage for the fallback data
+          try {
+            const savedData = localStorage.getItem('applicationData');
+            if (savedData) {
+              const parsed = JSON.parse(savedData);
+              
+              if (parsed && Object.keys(parsed).length > 0) {
+                for (const app of jobApplications) {
+                  if (parsed[app._id]) {
+                    // Update status from localStorage, preserve applicant info
+                    const savedApp = parsed[app._id];
+                    app.status = savedApp.status;
+                    
+                    // If savedApp has better applicant info, use it
+                    if (savedApp.applicant && 
+                        (savedApp.applicant.fullName || 
+                         (savedApp.applicant.firstName && savedApp.applicant.lastName))) {
+                      app.applicant = savedApp.applicant;
+                    }
+                  }
+                }
+              }
+            }
+          } catch (updateError) {
+            console.warn('Error updating with localStorage data:', updateError);
+          }
+          
+          // If we found applications this way, use them
+          if (jobApplications.length > 0) {
+            // Store all applications (visibleApplications computed prop will handle filtering)
+            allApplications.value = jobApplications;
+            
+            // Count pending applications
+            newApplicationsCount.value = jobApplications.filter(app => app.status === 'Pending').length;
+          } else {
+            // If we still don't have applications, create a default set
+            let defaultApps = [];
+            
+            for (const job of jobs.value) {
+              // Create a default application if the job has applications array
+              if (job.applications && job.applications.length > 0) {
+                const defaultApp = {
+                  _id: job.applications[0],
+                  jobId: job._id,
+                  job: job,
+                  status: 'Pending',
+                  applicant: {
+                    fullName: 'Unknown Applicant',
+                    email: 'unknown@example.com'
+                  },
+                  appliedDate: job.postedDate || new Date().toISOString()
+                };
+                defaultApps.push(defaultApp);
+              }
+            }
+            
+            if (defaultApps.length > 0) {
+              allApplications.value = defaultApps;
+              newApplicationsCount.value = defaultApps.filter(app => app.status === 'Pending').length;
+            }
+          }
         }
       }
     };
@@ -651,7 +727,7 @@ export default {
       showDeleteModal,
       jobToDelete,
       allApplications,
-      visibleApplications, // Use the computed property instead of recentApplications
+      visibleApplications,
       loadingApplications,
       formatDate,
       formatEmploymentType,
@@ -661,7 +737,9 @@ export default {
       confirmDeleteJob,
       deleteJob,
       updateApplicationStatus,
-      fetchJobs
+      fetchJobs,
+      getApplicantName,
+      getApplicantEmail
     };
   }
 };
