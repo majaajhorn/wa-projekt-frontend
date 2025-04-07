@@ -130,8 +130,8 @@
       // Helper to get applicant name consistently
       const getApplicantName = (application) => {
         // First try to get from applicant object
-        if (application.applicant?.firstName && application.applicant?.lastName) {
-          return `${application.applicant.firstName} ${application.applicant.lastName}`;
+        if (application.applicant?.fullName) {
+          return `${application.applicant.fullName}`;
         }
         
         // Next try applicantName field
