@@ -229,12 +229,39 @@ export default {
     const fetchApplications = async () => {
       try {
         loadingApplications.value = true;
+        
         const response = await apiClient.get('/applications/my-applications');
-        applications.value = response.data;
-        applicationCount.value = applications.value.length;
+        
+        // Make sure we have valid data structure
+        if (Array.isArray(response.data)) {
+          applications.value = response.data.filter(app => {
+            // Check that we have both application and job data
+            if (!app.job) {
+              console.error('Application missing job data:', app);
+              return false;
+            }
+            return true;
+          });
+          
+          applicationCount.value = applications.value.length;
+          console.log(`Loaded ${applicationCount.value} applications with data:`, applications.value);
+        } else {
+          console.error('Unexpected response data format:', response.data);
+          applications.value = [];
+          applicationCount.value = 0;
+        }
+        
         loadingApplications.value = false;
       } catch (error) {
         console.error('Error fetching applications:', error);
+        
+        // Check if there's a specific error response
+        if (error.response) {
+          console.error('Server response error:', error.response.data);
+        }
+        
+        applications.value = [];
+        applicationCount.value = 0;
         loadingApplications.value = false;
       }
     };
