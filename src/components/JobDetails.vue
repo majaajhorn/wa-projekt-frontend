@@ -1,106 +1,119 @@
 <template>
-    <div class="job-details-container">
-      <h1 class="page-title">Job Details</h1>
+  <div class="job-details-container">
+    <h1 class="page-title">Job Details</h1>
+    
+    <div class="back-link">
+      <router-link :to="userRole === 'employer' ? '/employer-dashboard' : '/jobseeker-dashboard'">
+        &larr; Back to Dashboard
+      </router-link>
+    </div>
+    
+    <div v-if="loading" class="loading-indicator">
+      <p>Loading job details...</p>
+    </div>
+    
+    <div v-else-if="!job" class="error-state">
+      <p>Job not found or could not be loaded.</p>
+      <router-link :to="userRole === 'employer' ? '/employer-dashboard' : '/jobseeker-dashboard'" class="btn-primary">Return to Dashboard</router-link>
+    </div>
+    
+    <div v-else class="job-details-card">
+      <div class="job-header">
+        <h2 class="job-title">{{ job.title }}</h2>
+        <div v-if="userRole === 'employer'" class="job-status" :class="job.active ? 'active' : 'inactive'">
+          {{ job.active ? 'Active' : 'Inactive' }}
+        </div>
+      </div>
       
-      <div class="back-link">
-        <router-link to="/employer-dashboard">
-          &larr; Back to Dashboard
+      <div class="job-meta">
+        <div class="meta-item">
+          <span class="meta-icon">📍</span>
+          <span class="meta-text">{{ job.location }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-icon">💰</span>
+          <span class="meta-text">£{{ job.salary }} {{ formatSalaryPeriod(job.salaryPeriod) }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-icon">🕒</span>
+          <span class="meta-text">{{ formatEmploymentType(job.employmentType) }}</span>
+        </div>
+      </div>
+      
+      <div class="job-stats">
+        <div class="stat-item">
+          <span class="stat-label">Posted:</span>
+          <span class="stat-value">{{ formatDate(job.postedDate) }}</span>
+        </div>
+        <div v-if="userRole === 'employer'" class="stat-item">
+          <span class="stat-label">Applications:</span>
+          <span class="stat-value">{{ job.applications ? job.applications.length : 0 }}</span>
+        </div>
+        <div v-if="job.applicationDeadline" class="stat-item">
+          <span class="stat-label">Deadline:</span>
+          <span class="stat-value">{{ formatDate(job.applicationDeadline) }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Positions:</span>
+          <span class="stat-value">{{ job.positions || 1 }}</span>
+        </div>
+      </div>
+      
+      <div class="job-section">
+        <h3 class="section-title">Description</h3>
+        <div class="section-content">
+          <p v-if="job.description" class="job-description">{{ job.description }}</p>
+          <p v-else class="empty-content">No description provided.</p>
+        </div>
+      </div>
+      
+      <div class="job-section">
+        <h3 class="section-title">Requirements</h3>
+        <div class="section-content">
+          <ul v-if="formattedRequirements.length > 0" class="requirements-list">
+            <li v-for="(requirement, index) in formattedRequirements" :key="index">
+              {{ requirement }}
+            </li>
+          </ul>
+          <p v-else class="empty-content">No specific requirements provided.</p>
+        </div>
+      </div>
+      
+      <div class="job-section">
+        <h3 class="section-title">Benefits</h3>
+        <div class="section-content">
+          <p v-if="job.benefits" class="job-benefits">{{ job.benefits }}</p>
+          <p v-else class="empty-content">No benefits details provided.</p>
+        </div>
+      </div>
+      
+      <!-- Different actions based on user role -->
+      <div v-if="userRole === 'employer'" class="job-actions">
+        <router-link :to="`/job-applications/${job._id}`" class="action-btn">
+          View Applications ({{ job.applications ? job.applications.length : 0 }})
         </router-link>
+        <router-link :to="`/edit-job/${job._id}`" class="action-btn">
+          Edit Job
+        </router-link>
+        <button @click="toggleJobStatus" class="action-btn" :class="job.active ? 'deactivate' : 'activate'">
+          {{ job.active ? 'Deactivate' : 'Activate' }} Job
+        </button>
+        <button @click="confirmDeleteJob" class="action-btn delete">
+          Delete Job
+        </button>
       </div>
       
-      <div v-if="loading" class="loading-indicator">
-        <p>Loading job details...</p>
-      </div>
-      
-      <div v-else-if="!job" class="error-state">
-        <p>Job not found or could not be loaded.</p>
-        <router-link to="/employer-dashboard" class="btn-primary">Return to Dashboard</router-link>
-      </div>
-      
-      <div v-else class="job-details-card">
-        <div class="job-header">
-          <h2 class="job-title">{{ job.title }}</h2>
-          <div class="job-status" :class="job.active ? 'active' : 'inactive'">
-            {{ job.active ? 'Active' : 'Inactive' }}
-          </div>
-        </div>
-        
-        <div class="job-meta">
-          <div class="meta-item">
-            <span class="meta-icon">📍</span>
-            <span class="meta-text">{{ job.location }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-icon">💰</span>
-            <span class="meta-text">£{{ job.salary }} {{ formatSalaryPeriod(job.salaryPeriod) }}</span>
-          </div>
-          <div class="meta-item">
-            <span class="meta-icon">🕒</span>
-            <span class="meta-text">{{ formatEmploymentType(job.employmentType) }}</span>
-          </div>
-        </div>
-        
-        <div class="job-stats">
-          <div class="stat-item">
-            <span class="stat-label">Posted:</span>
-            <span class="stat-value">{{ formatDate(job.postedDate) }}</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">Applications:</span>
-            <span class="stat-value">{{ job.applications ? job.applications.length : 0 }}</span>
-          </div>
-          <div v-if="job.applicationDeadline" class="stat-item">
-            <span class="stat-label">Deadline:</span>
-            <span class="stat-value">{{ formatDate(job.applicationDeadline) }}</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">Positions:</span>
-            <span class="stat-value">{{ job.positions || 1 }}</span>
-          </div>
-        </div>
-        
-        <div class="job-section">
-          <h3 class="section-title">Description</h3>
-          <div class="section-content">
-            <p v-if="job.description" class="job-description">{{ job.description }}</p>
-            <p v-else class="empty-content">No description provided.</p>
-          </div>
-        </div>
-        
-        <div class="job-section">
-          <h3 class="section-title">Requirements</h3>
-          <div class="section-content">
-            <ul v-if="formattedRequirements.length > 0" class="requirements-list">
-              <li v-for="(requirement, index) in formattedRequirements" :key="index">
-                {{ requirement }}
-              </li>
-            </ul>
-            <p v-else class="empty-content">No specific requirements provided.</p>
-          </div>
-        </div>
-        
-        <div class="job-section">
-          <h3 class="section-title">Benefits</h3>
-          <div class="section-content">
-            <p v-if="job.benefits" class="job-benefits">{{ job.benefits }}</p>
-            <p v-else class="empty-content">No benefits details provided.</p>
-          </div>
-        </div>
-        
-        <div class="job-actions">
-          <router-link :to="`/job-applications/${job._id}`" class="action-btn">
-            View Applications ({{ job.applications ? job.applications.length : 0 }})
-          </router-link>
-          <router-link :to="`/edit-job/${job._id}`" class="action-btn">
-            Edit Job
-          </router-link>
-          <button @click="toggleJobStatus" class="action-btn" :class="job.active ? 'deactivate' : 'activate'">
-            {{ job.active ? 'Deactivate' : 'Activate' }} Job
-          </button>
-          <button @click="confirmDeleteJob" class="action-btn delete">
-            Delete Job
-          </button>
-        </div>
+      <!-- Jobseeker actions -->
+      <div v-else class="job-actions">
+        <router-link :to="`/apply-job/${job._id}`" class="action-btn primary" v-if="!hasApplied">
+          Apply Now
+        </router-link>
+        <button class="action-btn" v-else disabled>
+          Already Applied
+        </button>
+        <button @click="toggleSavedJob" class="action-btn" :class="isSaved ? 'remove-saved' : 'save-job'">
+          {{ isSaved ? 'Remove from Saved Jobs' : 'Save Job' }}
+        </button>
       </div>
       
       <!-- Confirmation Modal -->
@@ -116,175 +129,246 @@
         </div>
       </div>
     </div>
-  </template>
-  
-  <script>
-  import { ref, onMounted, computed } from 'vue';
-  import { useRoute, useRouter } from 'vue-router';
-  import apiClient from '../api/axios.js';
-  
-  export default {
-    name: 'JobDetails',
-    setup() {
-      const route = useRoute();
-      const router = useRouter();
-      const jobId = route.params.id;
-      const job = ref(null);
-      const loading = ref(true);
-      const showDeleteModal = ref(false);
+  </div>
+</template>
+
+<script>
+import { ref, onMounted, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import apiClient from '../api/axios.js';
+
+export default {
+  name: 'JobDetails',
+  setup() {
+    const route = useRoute();
+    const router = useRouter();
+    const jobId = route.params.id;
+    const job = ref(null);
+    const loading = ref(true);
+    const showDeleteModal = ref(false);
+    const userRole = ref('');
+    const hasApplied = ref(false);
+    const isSaved = ref(false);
+    
+    const formattedRequirements = computed(() => {
+      if (!job.value || !job.value.requirements) return [];
       
-      const formattedRequirements = computed(() => {
-        if (!job.value || !job.value.requirements) return [];
-        
-        let requirementsArray = [];
-        
-        try {
-          // Check if requirements is already a string representation of an array
-          if (typeof job.value.requirements === 'string') {
-            if (job.value.requirements.trim().startsWith('[')) {
-              // It's a JSON string - parse it
-              requirementsArray = JSON.parse(job.value.requirements);
-            } else {
-              // It's a regular string - split by commas
-              requirementsArray = job.value.requirements.split(',').map(item => item.trim());
-            }
-          } else if (Array.isArray(job.value.requirements)) {
-            // It's already an array
-            requirementsArray = job.value.requirements;
+      let requirementsArray = [];
+      
+      try {
+        // Check if requirements is already a string representation of an array
+        if (typeof job.value.requirements === 'string') {
+          if (job.value.requirements.trim().startsWith('[')) {
+            // It's a JSON string - parse it
+            requirementsArray = JSON.parse(job.value.requirements);
+          } else {
+            // It's a regular string - split by commas
+            requirementsArray = job.value.requirements.split(',').map(item => item.trim());
           }
-        } catch (e) {
-          // If parsing fails, use it as is or empty array
-          console.error('Error parsing requirements:', e);
-          return [];
+        } else if (Array.isArray(job.value.requirements)) {
+          // It's already an array
+          requirementsArray = job.value.requirements;
+        }
+      } catch (e) {
+        // If parsing fails, use it as is or empty array
+        console.error('Error parsing requirements:', e);
+        return [];
+      }
+      
+      // Format each requirement
+      return requirementsArray.map(req => {
+        // Handle if requirement is not a string
+        if (typeof req !== 'string') {
+          return String(req);
         }
         
-        // Format each requirement
-        return requirementsArray.map(req => {
-          // Handle if requirement is not a string
-          if (typeof req !== 'string') {
-            return String(req);
-          }
-          
-          // Remove quotes if present
-          let formatted = req.replace(/^"|"$/g, '');
-          
-          // Replace underscores with spaces
-          formatted = formatted.replace(/_/g, ' ');
-          
-          // Capitalize first letter of each word
-          return formatted.split(' ')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
-        });
+        // Remove quotes if present
+        let formatted = req.replace(/^"|"$/g, '');
+        
+        // Replace underscores with spaces
+        formatted = formatted.replace(/_/g, ' ');
+        
+        // Capitalize first letter of each word
+        return formatted.split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
       });
-      
-      // Fetch job details
-      const fetchJobDetails = async () => {
+    });
+    
+    // Get user role from JWT
+    const getUserRole = () => {
+      const token = localStorage.getItem('token');
+      if (token) {
         try {
-          loading.value = true;
-          const response = await apiClient.get(`/jobs/${jobId}`);
-          job.value = response.data;
-          loading.value = false;
+          // Decode the JWT token to get user role
+          const base64Url = token.split('.')[1];
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const decodedToken = JSON.parse(atob(base64));
+          userRole.value = decodedToken.role;
+          console.log('User role:', userRole.value);
         } catch (error) {
-          console.error('Error fetching job details:', error);
-          loading.value = false;
+          console.error('Error decoding token:', error);
+          userRole.value = '';
         }
-      };
-      
-      // Format date for display
-      const formatDate = (dateString) => {
-        if (!dateString) return 'N/A';
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-GB', { 
-          day: 'numeric', 
-          month: 'short', 
-          year: 'numeric' 
-        });
-      };
-      
-      // Format employment type for display
-      const formatEmploymentType = (type) => {
-        const types = {
-          'full_time': 'Full Time',
-          'part_time': 'Part Time',
-          'contract': 'Contract',
-          'temporary': 'Temporary'
-        };
-        return types[type] || type;
-      };
-      
-      // Format salary period for display
-      const formatSalaryPeriod = (period) => {
-        const periods = {
-          'hourly': 'per hour',
-          'daily': 'per day',
-          'weekly': 'per week',
-          'monthly': 'per month',
-          'yearly': 'per year'
-        };
-        return periods[period] || period;
-      };
-      
-      // Toggle job active status
-      const toggleJobStatus = async () => {
-        if (!job.value) return;
+      }
+    };
+    
+    // Fetch job details
+    const fetchJobDetails = async () => {
+      try {
+        loading.value = true;
+        const response = await apiClient.get(`/jobs/${jobId}`);
+        job.value = response.data;
+        loading.value = false;
         
-        try {
-          const response = await apiClient.put(`/jobs/${jobId}`, {
-            active: !job.value.active
-          });
-          
-          if (response.status === 200) {
-            job.value.active = !job.value.active;
-          }
-        } catch (error) {
-          console.error('Error updating job status:', error);
-          alert('Failed to update job status. Please try again.');
+        // Check if jobseeker has applied to this job
+        if (userRole.value === 'jobseeker') {
+          checkApplicationStatus();
+          checkSavedStatus();
         }
-      };
-      
-      // Show delete confirmation modal
-      const confirmDeleteJob = () => {
-        showDeleteModal.value = true;
-      };
-      
-      // Delete job after confirmation
-      const deleteJob = async () => {
-        try {
-          const response = await apiClient.delete(`/jobs/${jobId}`);
-          
-          if (response.status === 200) {
-            alert('Job has been deleted successfully.');
-            router.push('/employer-dashboard');
-          }
-        } catch (error) {
-          console.error('Error deleting job:', error);
-          alert('Failed to delete job. Please try again.');
-          showDeleteModal.value = false;
+      } catch (error) {
+        console.error('Error fetching job details:', error);
+        loading.value = false;
+      }
+    };
+    
+    // Check if the jobseeker has already applied to this job
+    const checkApplicationStatus = async () => {
+      try {
+        const response = await apiClient.get(`/applications/check/${jobId}`);
+        hasApplied.value = response.data.hasApplied;
+      } catch (error) {
+        console.error('Error checking application status:', error);
+      }
+    };
+    
+    // Check if the job is saved by the jobseeker
+    const checkSavedStatus = async () => {
+      try {
+        const response = await apiClient.get(`/jobs/saved/check/${jobId}`);
+        isSaved.value = response.data.isSaved;
+      } catch (error) {
+        console.error('Error checking saved status:', error);
+      }
+    };
+    
+    // Toggle save/unsave job
+    const toggleSavedJob = async () => {
+      try {
+        if (isSaved.value) {
+          // Remove from saved jobs
+          await apiClient.delete(`/jobs/saved/${jobId}`);
+        } else {
+          // Add to saved jobs
+          await apiClient.post(`/jobs/saved/${jobId}`);
         }
-      };
-      
-      // Fetch job data on component mount
-      onMounted(() => {
-        fetchJobDetails();
+        // Toggle local state
+        isSaved.value = !isSaved.value;
+      } catch (error) {
+        console.error('Error toggling saved job:', error);
+        alert('Failed to update saved status. Please try again.');
+      }
+    };
+    
+    // Format date for display
+    const formatDate = (dateString) => {
+      if (!dateString) return 'N/A';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('en-GB', { 
+        day: 'numeric', 
+        month: 'short', 
+        year: 'numeric' 
       });
-      
-      return {
-        job,
-        loading,
-        showDeleteModal,
-        formattedRequirements,
-        formatDate,
-        formatEmploymentType,
-        formatSalaryPeriod,
-        toggleJobStatus,
-        confirmDeleteJob,
-        deleteJob
+    };
+    
+    // Format employment type for display
+    const formatEmploymentType = (type) => {
+      const types = {
+        'full_time': 'Full Time',
+        'part_time': 'Part Time',
+        'contract': 'Contract',
+        'temporary': 'Temporary'
       };
-    }
-  };
-  </script>
-  
+      return types[type] || type;
+    };
+    
+    // Format salary period for display
+    const formatSalaryPeriod = (period) => {
+      const periods = {
+        'hourly': 'per hour',
+        'daily': 'per day',
+        'weekly': 'per week',
+        'monthly': 'per month',
+        'yearly': 'per year'
+      };
+      return periods[period] || period;
+    };
+    
+    // Toggle job active status
+    const toggleJobStatus = async () => {
+      if (!job.value) return;
+      
+      try {
+        const response = await apiClient.put(`/jobs/${jobId}`, {
+          active: !job.value.active
+        });
+        
+        if (response.status === 200) {
+          job.value.active = !job.value.active;
+        }
+      } catch (error) {
+        console.error('Error updating job status:', error);
+        alert('Failed to update job status. Please try again.');
+      }
+    };
+    
+    // Show delete confirmation modal
+    const confirmDeleteJob = () => {
+      showDeleteModal.value = true;
+    };
+    
+    // Delete job after confirmation
+    const deleteJob = async () => {
+      try {
+        const response = await apiClient.delete(`/jobs/${jobId}`);
+        
+        if (response.status === 200) {
+          alert('Job has been deleted successfully.');
+          router.push('/employer-dashboard');
+        }
+      } catch (error) {
+        console.error('Error deleting job:', error);
+        alert('Failed to delete job. Please try again.');
+        showDeleteModal.value = false;
+      }
+    };
+    
+    // Fetch job data on component mount
+    onMounted(() => {
+      getUserRole();
+      fetchJobDetails();
+    });
+    
+    return {
+      job,
+      loading,
+      showDeleteModal,
+      userRole,
+      hasApplied,
+      isSaved,
+      formattedRequirements,
+      formatDate,
+      formatEmploymentType,
+      formatSalaryPeriod,
+      toggleJobStatus,
+      confirmDeleteJob,
+      deleteJob,
+      toggleSavedJob
+    };
+  }
+};
+</script>
+
   <style scoped>
   .job-details-container {
     max-width: 800px;
