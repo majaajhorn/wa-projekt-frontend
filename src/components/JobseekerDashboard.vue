@@ -7,7 +7,7 @@
         <h3>Applied Jobs</h3>
         <p class="stat-number">{{ applicationCount }}</p>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" @click="scrollToSavedJobs" style="cursor: pointer;">
         <h3>Saved Jobs</h3>
         <p class="stat-number">{{ savedJobsCount }}</p>
       </div>
@@ -104,7 +104,7 @@
       </div>
     </div>
     
-    <div class="saved-jobs-section">
+    <div class="saved-jobs-section" ref="savedJobsSection">
       <div class="section-header">
         <h2>Saved Jobs</h2>
       </div>
@@ -146,9 +146,6 @@
             <router-link :to="`/job-details/${job._id}`" class="action-link">
               View Details
             </router-link>
-            <button class="action-link" @click="applyForJob(job._id)">
-              Apply Now
-            </button>
             <button class="action-link danger" @click="confirmRemoveSavedJob(job)">
               Remove
             </button>
@@ -201,6 +198,7 @@ export default {
     const applicationCount = ref(0);
     const showWithdrawModal = ref(false);
     const applicationToWithdraw = ref(null);
+    const savedJobsSection = ref(null);
     
     // Saved jobs states
     const savedJobs = ref([]);
@@ -287,7 +285,7 @@ export default {
         profileViews.value = response.data.viewCount || 0;
       } catch (error) {
         console.error('Error fetching profile stats:', error);
-        // Use default value if error
+        // Use default value if error - Don't let this error break the rest of the page
         profileViews.value = 0;
       }
     };
@@ -403,6 +401,15 @@ export default {
         alert('Failed to remove saved job. Please try again.');
       }
     };
+
+    const scrollToSavedJobs = () => {
+      if (savedJobsSection.value) {
+        savedJobsSection.value.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    };
     
     // Fetch data when component is mounted
     onMounted(() => {
@@ -427,6 +434,7 @@ export default {
       savedJobsCount,
       showRemoveModal,
       jobToRemove,
+      savedJobsSection,
       
       // Profile
       profileViews,
@@ -441,7 +449,8 @@ export default {
       confirmWithdrawApplication,
       withdrawApplication,
       confirmRemoveSavedJob,
-      removeSavedJob
+      removeSavedJob,
+      scrollToSavedJobs
     };
   }
 };
