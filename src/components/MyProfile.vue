@@ -354,7 +354,17 @@ export default {
     const editProfile = ref(false);
 
     const goBack = () => {
-      router.back();
+      // Determine which dashboard to return to based on user role
+      const userRole = localStorage.getItem('userRole') || 
+                      (localStorage.getItem('token') ? 
+                      JSON.parse(atob(localStorage.getItem('token').split('.')[1])).role : 
+                      'jobseeker');
+                      
+      if (userRole === 'employer') {
+        router.push('/employer-dashboard');
+      } else {
+        router.push('/jobseeker-dashboard');
+      }
     };
 
     // Get user's initials for the profile picture placeholder

@@ -3,15 +3,15 @@
     <h1 class="dashboard-title">Employer Dashboard</h1>
     
     <div class="dashboard-stats">
-      <div class="stat-card">
+      <div class="stat-card" @click="scrollToJobs" style="cursor: pointer;">
         <h3>Active Jobs</h3>
         <p class="stat-number">{{ activeJobsCount }}</p>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" @click="scrollToApplications" style="cursor: pointer;">
         <h3>Total Applications</h3>
         <p class="stat-number">{{ totalApplications }}</p>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" @click="scrollToApplications" style="cursor: pointer;">
         <h3>New Applications</h3>
         <p class="stat-number">{{ newApplicationsCount }}</p>
       </div>
@@ -29,7 +29,7 @@
     </div>
     
     <!-- Recent Applications Section -->
-    <div v-if="visibleApplications.length > 0" class="recent-applications-section">
+    <div v-if="visibleApplications.length > 0" class="recent-applications-section" ref="applicationsSection">
       <div class="section-header">
         <h2>Recent Applications</h2>
         <router-link to="/all-applications" class="view-all-link">
@@ -74,7 +74,7 @@
       </div>
     </div>
     
-    <div class="my-jobs-section">
+    <div class="my-jobs-section" ref="jobsSection">
       <div class="section-header">
         <h2>My Job Listings</h2>
         <div class="filter-controls">
@@ -199,6 +199,8 @@ export default {
     const jobToDelete = ref(null);
     const allApplications = ref([]);
     const loadingApplications = ref(false);
+    const jobsSection = ref(null);
+    const applicationsSection = ref(null);
 
     // Filter jobs based on status
     const filteredJobs = computed(() => {
@@ -708,6 +710,24 @@ export default {
       }
     };
 
+    const scrollToJobs = () => {
+      if (jobsSection.value) {
+        jobsSection.value.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    };
+
+    const scrollToApplications = () => {
+      if (applicationsSection.value) {
+        applicationsSection.value.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    };
+
     // Fetch jobs and applications when component is mounted
     onMounted(() => {
       fetchJobs().then(() => {
@@ -729,6 +749,10 @@ export default {
       allApplications,
       visibleApplications,
       loadingApplications,
+      jobsSection,
+      applicationsSection,
+      scrollToJobs,
+      scrollToApplications,
       formatDate,
       formatEmploymentType,
       formatSalaryPeriod,

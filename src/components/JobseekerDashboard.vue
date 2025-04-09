@@ -3,7 +3,7 @@
     <h1 class="dashboard-title">Jobseeker Dashboard</h1>
     
     <div class="dashboard-stats">
-      <div class="stat-card">
+      <div class="stat-card" @click="scrollToApplications" style="cursor: pointer;">
         <h3>Applied Jobs</h3>
         <p class="stat-number">{{ applicationCount }}</p>
       </div>
@@ -28,7 +28,7 @@
       </router-link>
     </div>
     
-    <div class="my-applications-section">
+    <div class="my-applications-section" ref="applicationsSection">
       <div class="section-header">
         <h2>My Applications</h2>
         <div class="filter-controls">
@@ -199,6 +199,7 @@ export default {
     const showWithdrawModal = ref(false);
     const applicationToWithdraw = ref(null);
     const savedJobsSection = ref(null);
+    const applicationsSection = ref(null);
     
     // Saved jobs states
     const savedJobs = ref([]);
@@ -410,6 +411,15 @@ export default {
         });
       }
     };
+
+    const scrollToApplications = () => {
+      if (applicationsSection.value) {
+        applicationsSection.value.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    };
     
     // Fetch data when component is mounted
     onMounted(() => {
@@ -427,6 +437,7 @@ export default {
       applicationCount,
       showWithdrawModal,
       applicationToWithdraw,
+      applicationsSection,
       
       // Saved Jobs
       savedJobs,
@@ -450,7 +461,8 @@ export default {
       withdrawApplication,
       confirmRemoveSavedJob,
       removeSavedJob,
-      scrollToSavedJobs
+      scrollToSavedJobs,
+      scrollToApplications,
     };
   }
 };
