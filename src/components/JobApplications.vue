@@ -168,13 +168,18 @@
           const jobResponse = await apiClient.get(`/jobs/${jobId}`);
           jobTitle.value = jobResponse.data.title || 'This Job';
           
-          // Then get all applications for this job
-          const applicationsResponse = await apiClient.get(`/jobs/${jobId}/applications`);
+          // Then get all applications for this job - UPDATED ENDPOINT
+          const applicationsResponse = await apiClient.get(`/applications/job/${jobId}`);
           applications.value = applicationsResponse.data || [];
+          
+          console.log(`Loaded ${applications.value.length} applications for job ${jobId}`);
           
           loading.value = false;
         } catch (error) {
           console.error('Error fetching job applications:', error);
+          if (error.response) {
+            console.error('Server response:', error.response.data);
+          }
           loading.value = false;
         }
       };
