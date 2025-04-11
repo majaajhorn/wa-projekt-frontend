@@ -29,6 +29,11 @@
       </button>
     </div>
 
+    <!-- Display reviews section for jobseekers -->
+    <div v-if="user.role === 'jobseeker'" class="reviews-section">
+      <JobseekerReviews :jobseekerId="user._id || user.id" />
+    </div>
+
     <!-- Complete Profile Section -->
     <div v-if="!user.profileCompleted" class="complete-profile-alert">
       <p v-if="user.role === 'jobseeker'">Please complete your profile to increase your chances of getting hired!</p>
@@ -302,9 +307,13 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import apiClient from '../api/axios.js';
+import JobseekerReviews from './JobseekerReviews.vue';
 
 export default {
   name: 'MyProfile',
+  components: {
+    JobseekerReviews
+  },
   setup() {
     const user = ref({});
     const updatedEmail = ref('');

@@ -15,13 +15,14 @@ import BrowseCarers from '../components/BrowseCarers.vue';
 import ApplicationDetails from '../components/ApplicationDetails.vue';
 import ApplyJob from '../components/ApplyJob.vue';
 import AllApplications from '../components/AllApplications.vue';
-import ForgotPassword from '../components/ForgotPassword.vue'; // Import the ForgotPassword component
+import ForgotPassword from '../components/ForgotPassword.vue';
+import JobseekerProfile from '../components/JobseekerProfile.vue';
 
 const routes = [
   { path: '/', component: Home },
   { path: '/login', component: LoginForm },
   { path: '/register', component: RegisterForm },
-  { path: '/forgot-password', component: ForgotPassword }, // Add the forgot-password route
+  { path: '/forgot-password', component: ForgotPassword },
   { path: '/jobseeker-dashboard', component: JobseekerDashboard, meta: { requiresAuth: true } },
   { path: '/my-profile', component: MyProfile, meta: { requiresAuth: true } },
   { path: '/job-search', component: JobSearch, meta: { requiresAuth: true } },
@@ -30,13 +31,14 @@ const routes = [
   { path: '/job-applications/:id', component: JobApplications, meta: { requiresAuth: true, employerOnly: true } },
   { path: '/edit-job/:id', component: EditJob, meta: { requiresAuth: true, employerOnly: true } },
   { path: '/job-details/:id', component: JobDetails, meta: { requiresAuth: true } },
-  { path: '/about', component: About }, // No auth required
+  { path: '/about', component: About },
   { path: '/application-details/:id', component: ApplicationDetails, meta: { requiresAuth: true } },
   { path: '/apply-job/:id', component: ApplyJob, meta: { requiresAuth: true, roles: ['jobseeker'] } },
   
   // Modified BrowseCarers route to handle both public and authenticated access
   { path: '/browse-carers', component: BrowseCarers, meta: { requiresAuthForEmployers: true } },
   { path: '/all-applications', name: 'AllApplications', component: AllApplications, meta: { requiresAuth: true, employerOnly: true } },
+  { path: '/jobseeker-profile/:id', name: 'JobseekerProfile', component: JobseekerProfile, meta: { requiresAuth: true } },
 ];
 
 const router = createRouter({

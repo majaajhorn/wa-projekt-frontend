@@ -32,45 +32,114 @@
       </router-link>
     </div>
     
-    <!-- Recent Applications Section -->
-    <div v-if="visibleApplications.length > 0" class="recent-applications-section" ref="applicationsSection">
-      <div class="section-header">
-        <h2>Recent Applications</h2>
-        <router-link to="/all-applications" class="view-all-link">
-          View All
-        </router-link>
-      </div>
-      
-      <div class="application-listings">
-        <div 
-          v-for="application in visibleApplications" 
-          :key="application._id" 
-          class="application-card"
-        >
-          <div class="application-header">
-            <div class="application-job-title">{{ application.job?.title }}</div>
-            <div class="application-status" :class="application.status.toLowerCase()">
-              {{ application.status }}
+    <!-- New tabbed interface -->
+    <div class="dashboard-tabs">
+      <button 
+        @click="switchTab('jobs')" 
+        :class="['tab-btn', activeTab === 'jobs' ? 'active-tab' : '']"
+      >
+        My Jobs
+      </button>
+      <button 
+        @click="switchTab('applications')" 
+        :class="['tab-btn', activeTab === 'applications' ? 'active-tab' : '']"
+      >
+        Applications
+      </button>
+      <button 
+        @click="switchTab('reviews')" 
+        :class="['tab-btn', activeTab === 'reviews' ? 'active-tab' : '']"
+        v-if="hiredApplicants.length > 0"
+      >
+        Reviews
+      </button>
+    </div>
+    
+    <!-- Jobs Tab Content -->
+    <div v-if="activeTab === 'jobs'" class="tab-content">
+      <div class="my-jobs-section" ref="jobsSection">
+        <div class="section-header">
+          <h2>My Job Listings</h2>
+          <div class="filter-controls">
+            <button 
+              @click="filterStatus = 'all'" 
+              :class="['filter-btn', filterStatus === 'all' ? 'active' : '']"
+            >
+              All
+            </button>
+            <button 
+              @click="filterStatus = 'active'" 
+              :class="['filter-btn', filterStatus === 'active' ? 'active' : '']"
+            >
+              Active
+            </button>
+            <button 
+              @click="filterStatus = 'inactive'" 
+              :class="['filter-btn', filterStatus === 'inactive' ? 'active' : '']"
+            >
+              Inactive
+            </button>
+          </div>
+        </div>
+        
+        <div v-if="loading" class="loading-indicator">
+          <p>Loading job listings...</p>
+        </div>
+        
+        <div v-else-if="error" class="error-state">
+          <p>{{ error }}</p>
+          <button @click="fetchJobs" class="primary-btn">Try Again</button>
+        </div>
+        
+        <div v-else-if="filteredJobs.length === 0" class="empty-state">
+          <p v-if="filterStatus === 'all'">You haven't posted any jobs yet.</p>
+          <p v-else>No {{ filterStatus }} jobs found.</p>
+          <router-link to="/post-job" class="primary-btn">Post Your First Job</router-link>
+        </div>
+        
+        <div v-else class="job-listings">
+          <div 
+            v-for="job in filteredJobs" 
+            :key="job._id" 
+            class="job-card" 
+            @click="viewJobDetails(job._id)"
+          >
+            <div class="job-status" :class="job.active ? 'active' : 'inactive'">
+              {{ job.active ? 'Active' : 'Inactive' }}
             </div>
-          </div>
-          <div class="applicant-info">
-            <h4 class="applicant-name">{{ getApplicantName(application) }}</h4>
-            <p class="applicant-email">✉️ {{ getApplicantEmail(application) }}</p>
-            <p v-if="application.applicant?.phone" class="applicant-phone">📞 {{ application.applicant?.phone }}</p>
-          </div>
-          <div class="application-meta">
-            <p class="application-date">Applied: {{ formatDate(application.appliedDate) }}</p>
-          </div>
-          <div class="application-actions">
-            <router-link :to="`/application-details/${application._id}`" class="action-link view">
-              View Application
-            </router-link>
-            <div class="status-actions" v-if="application.status === 'Pending'">
-              <button @click="updateApplicationStatus(application._id, 'Hired')" class="action-link approve" style="padding: 8px 12px; margin-right: 8px;">
-                Approve Application
+            <h3 class="job-title">{{ job.title }}</h3>
+            <div class="job-details">
+              <p class="job-location">📍 {{ job.location }}</p>
+              <p class="job-salary">💰 £{{ job.salary }} {{ formatSalaryPeriod(job.salaryPeriod) }}</p>
+              <p class="job-type">🕒 {{ formatEmploymentType(job.employmentType) }}</p>
+            </div>
+            <div class="job-stats">
+              <span class="stat-item">
+                <span class="stat-label">Posted:</span>
+                {{ formatDate(job.postedDate) }}
+              </span>
+              <span class="stat-item">
+                <span class="stat-label">Applications:</span>
+                <span :class="{'highlight': job.applications && job.applications.length > 0}">
+                  {{ job.applications ? job.applications.length : 0 }}
+                </span>
+              </span>
+            </div>
+            <div class="job-actions" @click.stop>
+              <router-link :to="'/all-applications'" class="action-link">
+                View Applications
+                <span v-if="job.applications && job.applications.length > 0" class="application-badge">
+                  {{ job.applications.length }}
+                </span>
+              </router-link>
+              <router-link :to="`/edit-job/${job._id}`" class="action-link">
+                Edit
+              </router-link>
+              <button class="action-link danger" @click="toggleJobStatus(job)">
+                {{ job.active ? 'Deactivate' : 'Activate' }}
               </button>
-              <button @click="updateApplicationStatus(application._id, 'Rejected')" class="action-link reject" style="padding: 8px 12px;">
-                Reject
+              <button class="action-link danger" @click="confirmDeleteJob(job)">
+                Delete
               </button>
             </div>
           </div>
@@ -78,90 +147,84 @@
       </div>
     </div>
     
-    <div class="my-jobs-section" ref="jobsSection">
-      <div class="section-header">
-        <h2>My Job Listings</h2>
-        <div class="filter-controls">
-          <button 
-            @click="filterStatus = 'all'" 
-            :class="['filter-btn', filterStatus === 'all' ? 'active' : '']"
+    <!-- Applications Tab Content -->
+    <div v-if="activeTab === 'applications'" class="tab-content">
+      <div v-if="visibleApplications.length > 0" class="recent-applications-section" ref="applicationsSection">
+        <div class="section-header">
+          <h2>Recent Applications</h2>
+          <router-link to="/all-applications" class="view-all-link">
+            View All
+          </router-link>
+        </div>
+        
+        <div class="application-listings">
+          <div 
+            v-for="application in visibleApplications" 
+            :key="application._id" 
+            class="application-card"
           >
-            All
-          </button>
-          <button 
-            @click="filterStatus = 'active'" 
-            :class="['filter-btn', filterStatus === 'active' ? 'active' : '']"
-          >
-            Active
-          </button>
-          <button 
-            @click="filterStatus = 'inactive'" 
-            :class="['filter-btn', filterStatus === 'inactive' ? 'active' : '']"
-          >
-            Inactive
-          </button>
+            <div class="application-header">
+              <div class="application-job-title">{{ application.job?.title }}</div>
+              <div class="application-status" :class="application.status.toLowerCase()">
+                {{ application.status }}
+              </div>
+            </div>
+            <div class="applicant-info">
+              <h4 class="applicant-name">{{ getApplicantName(application) }}</h4>
+              <p class="applicant-email">✉️ {{ getApplicantEmail(application) }}</p>
+              <p v-if="application.applicant?.phone" class="applicant-phone">📞 {{ application.applicant?.phone }}</p>
+            </div>
+            <div class="application-meta">
+              <p class="application-date">Applied: {{ formatDate(application.appliedDate) }}</p>
+            </div>
+            <div class="application-actions">
+              <router-link :to="`/application-details/${application._id}`" class="action-link view">
+                View Application
+              </router-link>
+              <div class="status-actions" v-if="application.status === 'Pending'">
+                <button @click="updateApplicationStatus(application._id, 'Hired')" class="action-link approve" style="padding: 8px 12px; margin-right: 8px;">
+                  Approve Application
+                </button>
+                <button @click="updateApplicationStatus(application._id, 'Rejected')" class="action-link reject" style="padding: 8px 12px;">
+                  Reject
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      
-      <div v-if="loading" class="loading-indicator">
-        <p>Loading job listings...</p>
+      <div v-else class="empty-state">
+        <p>You don't have any applications yet.</p>
       </div>
-      
-      <div v-else-if="error" class="error-state">
-        <p>{{ error }}</p>
-        <button @click="fetchJobs" class="primary-btn">Try Again</button>
-      </div>
-      
-      <div v-else-if="filteredJobs.length === 0" class="empty-state">
-        <p v-if="filterStatus === 'all'">You haven't posted any jobs yet.</p>
-        <p v-else>No {{ filterStatus }} jobs found.</p>
-        <router-link to="/post-job" class="primary-btn">Post Your First Job</router-link>
-      </div>
-      
-      <div v-else class="job-listings">
-        <div 
-          v-for="job in filteredJobs" 
-          :key="job._id" 
-          class="job-card" 
-          @click="viewJobDetails(job._id)"
-        >
-          <div class="job-status" :class="job.active ? 'active' : 'inactive'">
-            {{ job.active ? 'Active' : 'Inactive' }}
-          </div>
-          <h3 class="job-title">{{ job.title }}</h3>
-          <div class="job-details">
-            <p class="job-location">📍 {{ job.location }}</p>
-            <p class="job-salary">💰 £{{ job.salary }} {{ formatSalaryPeriod(job.salaryPeriod) }}</p>
-            <p class="job-type">🕒 {{ formatEmploymentType(job.employmentType) }}</p>
-          </div>
-          <div class="job-stats">
-            <span class="stat-item">
-              <span class="stat-label">Posted:</span>
-              {{ formatDate(job.postedDate) }}
-            </span>
-            <span class="stat-item">
-              <span class="stat-label">Applications:</span>
-              <span :class="{'highlight': job.applications && job.applications.length > 0}">
-                {{ job.applications ? job.applications.length : 0 }}
-              </span>
-            </span>
-          </div>
-          <div class="job-actions" @click.stop>
-            <router-link :to="'/all-applications'" class="action-link">
-              View Applications
-              <span v-if="job.applications && job.applications.length > 0" class="application-badge">
-                {{ job.applications.length }}
-              </span>
-            </router-link>
-            <router-link :to="`/edit-job/${job._id}`" class="action-link">
-              Edit
-            </router-link>
-            <button class="action-link danger" @click="toggleJobStatus(job)">
-              {{ job.active ? 'Deactivate' : 'Activate' }}
-            </button>
-            <button class="action-link danger" @click="confirmDeleteJob(job)">
-              Delete
-            </button>
+    </div>
+    
+    <!-- Reviews Tab Content -->
+    <div v-if="activeTab === 'reviews'" class="tab-content">
+      <div class="reviewable-jobseekers-section">
+        <div class="section-header">
+          <h2>Rate Your Talent</h2>
+        </div>
+        
+        <div class="jobseekers-list">
+          <div v-for="applicant in hiredApplicants" :key="applicant._id" class="jobseeker-card">
+            <div class="jobseeker-info">
+              <h3 class="jobseeker-name">{{ getApplicantName(applicant) }}</h3>
+              <p class="jobseeker-job">Hired for: {{ applicant.job?.title || 'Unknown position' }}</p>
+              <p class="jobseeker-hired-date">Hired on: {{ formatDate(applicant.statusUpdateDate || applicant.appliedDate) }}</p>
+            </div>
+            
+            <div class="jobseeker-actions">
+              <router-link :to="`/jobseeker-profile/${applicant.applicantId}`" class="view-profile-btn">
+                View Profile
+              </router-link>
+              <button 
+                @click="showReviewModal(applicant.applicantId)" 
+                class="review-btn"
+                :disabled="applicant.hasReviewed"
+              >
+                {{ applicant.hasReviewed ? 'Already Reviewed' : 'Leave Review' }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -179,6 +242,23 @@
         </div>
       </div>
     </div>
+
+    <!-- Review Modal -->
+    <div v-if="showReviewModalFlag" class="modal-backdrop">
+      <div class="modal-content review-modal">
+        <div class="modal-header">
+          <h3>Review Jobseeker</h3>
+          <button @click="closeReviewModal" class="close-btn">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+          <ReviewForm 
+            :jobseekerId="selectedJobseekerId" 
+            @review-submitted="handleReviewSubmitted" 
+          />
+        </div>
+      </div>
+    </div>
   </div>
 </template>
   
@@ -187,10 +267,16 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import apiClient from '../api/axios.js';
 import { applicationStatusService } from '../services/applicationStatusService';
-import ChangePassword from './ChangePassword.vue'; // Import the component
+import ChangePassword from './ChangePassword.vue'; 
+import ReviewForm from './ReviewForm.vue'; 
+import { reviewService } from '../services/reviewService';
 
 export default {
   name: 'EmployerDashboard',
+  components: {
+    ChangePassword,
+    ReviewForm
+  },
   setup() {
     const router = useRouter();
     const jobs = ref([]);
@@ -206,8 +292,70 @@ export default {
     const loadingApplications = ref(false);
     const jobsSection = ref(null);
     const applicationsSection = ref(null);
-
     const showChangePasswordForm = ref(false);
+    const hiredApplicants = ref([]);
+    const showReviewModalFlag = ref(false);
+    const selectedJobseekerId = ref(null);
+    const activeTab = ref('jobs');
+
+    // function to handle tab switching
+    const switchTab = (tab) => {
+      activeTab.value = tab;
+    };
+
+    // Add this function to fetch hired applicants
+    const fetchHiredApplicants = async () => {
+      try {
+        // First get all applications
+        const response = await apiClient.get('/applications/employer-applications');
+        
+        if (response.data && Array.isArray(response.data)) {
+          // Filter for hired applicants only
+          const hired = response.data.filter(app => app.status === 'Hired');
+          
+          // Check which jobseekers have already been reviewed
+          const hiredWithReviewStatus = await Promise.all(
+            hired.map(async (applicant) => {
+              try {
+                // Only check if we have an applicantId
+                if (applicant.applicantId) {
+                  const reviewCheck = await reviewService.checkIfReviewed(applicant.applicantId);
+                  return {
+                    ...applicant,
+                    hasReviewed: reviewCheck.data.hasReviewed
+                  };
+                }
+                return { ...applicant, hasReviewed: false };
+              } catch (error) {
+                console.error('Error checking review status:', error);
+                return { ...applicant, hasReviewed: false };
+              }
+            })
+          );
+          
+          hiredApplicants.value = hiredWithReviewStatus;
+        }
+      } catch (error) {
+        console.error('Error fetching hired applicants:', error);
+      }
+    };
+
+    // Add these methods for the review modal
+    const showReviewModal = (jobseekerId) => {
+      selectedJobseekerId.value = jobseekerId;
+      showReviewModalFlag.value = true;
+    };
+
+    const closeReviewModal = () => {
+      showReviewModalFlag.value = false;
+      selectedJobseekerId.value = null;
+    };
+
+    const handleReviewSubmitted = () => {
+      closeReviewModal();
+      // Refresh the list of hired applicants to update review status
+      fetchHiredApplicants();
+    };
 
     // Filter jobs based on status
     const filteredJobs = computed(() => {
@@ -743,6 +891,7 @@ export default {
     onMounted(() => {
       fetchJobs().then(() => {
         fetchRecentApplications();
+        fetchHiredApplicants();
       });
 
       // Check if user has a temporary password
@@ -780,7 +929,15 @@ export default {
       updateApplicationStatus,
       fetchJobs,
       getApplicantName,
-      getApplicantEmail
+      getApplicantEmail,
+      hiredApplicants,
+      showReviewModalFlag,
+      selectedJobseekerId,
+      showReviewModal,
+      closeReviewModal,
+      handleReviewSubmitted,
+      activeTab,
+      switchTab
     };
   }
 };
@@ -1304,5 +1461,182 @@ export default {
     flex-direction: column;
     gap: 5px;
   }
+}
+
+.reviewable-jobseekers-section {
+  margin-top: 30px;
+}
+
+.jobseekers-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.jobseeker-card {
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.jobseeker-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.jobseeker-name {
+  font-size: 1.3rem;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.jobseeker-job, .jobseeker-hired-date {
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.jobseeker-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.view-profile-btn, .review-btn {
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  flex: 1;
+  border: none;
+  font-weight: 500;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 46px; /* Ensure consistent height */
+}
+
+.view-profile-btn {
+  background-color: #f5f5f5;
+  color: #444;
+}
+
+.view-profile-btn:hover {
+  background-color: #e8e8e8;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+.review-btn {
+  background-color: #4caf50;
+  color: white;
+}
+
+.review-btn:hover:not(:disabled) {
+  background-color: #3d8b40;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+.review-btn:disabled {
+  background-color: #a5d6a7;
+  color: white;
+  opacity: 0.9;
+  cursor: not-allowed;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 15px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #888;
+}
+
+.close-btn:hover {
+  color: #333;
+}
+
+.dashboard-tabs {
+  display: flex;
+  border-bottom: 1px solid #e0e0e0;
+  margin: 20px 0;
+  gap: 10px;
+}
+
+.tab-btn {
+  padding: 12px 24px;
+  font-size: 1rem;
+  background: none;
+  border: none;
+  color: #666;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  border-radius: 8px 8px 0 0;
+}
+
+.tab-btn:hover {
+  background-color: #f5f5f5;
+  color: #4caf50;
+}
+
+.tab-btn.active-tab {
+  color: #4caf50;
+  background-color: #f9f9f9;
+  border-bottom: 3px solid #4caf50;
+}
+
+.tab-badge {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: #4caf50;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+.tab-content {
+  margin-top: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  margin: 20px 0;
+  color: #666;
 }
 </style>
