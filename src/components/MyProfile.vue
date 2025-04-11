@@ -29,11 +29,6 @@
       </button>
     </div>
 
-    <!-- Display reviews section for jobseekers -->
-    <div v-if="user.role === 'jobseeker'" class="reviews-section">
-      <JobseekerReviews :jobseekerId="user._id || user.id" />
-    </div>
-
     <!-- Complete Profile Section -->
     <div v-if="!user.profileCompleted" class="complete-profile-alert">
       <p v-if="user.role === 'jobseeker'">Please complete your profile to increase your chances of getting hired!</p>
@@ -161,24 +156,44 @@
       </form>
     </div>
 
-    <!-- Edit Email Form -->
-    <div v-if="editEmail" class="modal-form">
-      <h3 class="section-title">Change Email</h3>
-      <input v-model="updatedEmail" type="email" placeholder="Enter new email" class="text-input" />
-      <div class="form-actions">
-        <button @click="editEmail = false" class="cancel-btn">Cancel</button>
-        <button @click="updateEmail" class="primary-btn">Save Email</button>
+    <!-- Edit Email Modal -->
+    <div v-if="editEmail" class="modal-overlay">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3 class="modal-title">Change Email</h3>
+          <button @click="editEmail = false" class="modal-close-btn">✕</button>
+        </div>
+        <div class="modal-body">
+          <input v-model="updatedEmail" type="email" placeholder="Enter new email" class="text-input" />
+        </div>
+        <div class="modal-footer">
+          <button @click="editEmail = false" class="cancel-btn">Cancel</button>
+          <button @click="updateEmail" class="primary-btn">Save Email</button>
+        </div>
       </div>
     </div>
 
-    <!-- Edit Password Form -->
-    <div v-if="editPassword" class="modal-form">
-      <h3 class="section-title">Change Password</h3>
-      <input v-model="currentPassword" type="password" placeholder="Current password" class="text-input" />
-      <input v-model="newPassword" type="password" placeholder="New password" class="text-input" />
-      <div class="form-actions">
-        <button @click="editPassword = false" class="cancel-btn">Cancel</button>
-        <button @click="updatePassword" class="primary-btn">Save Password</button>
+    <!-- Edit Password Modal -->
+    <div v-if="editPassword" class="modal-overlay">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3 class="modal-title">Change Password</h3>
+          <button @click="editPassword = false" class="modal-close-btn">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-field">
+            <label for="currentPassword">Current Password</label>
+            <input v-model="currentPassword" id="currentPassword" type="password" placeholder="Current password" class="text-input" />
+          </div>
+          <div class="form-field">
+            <label for="newPassword">New Password</label>
+            <input v-model="newPassword" id="newPassword" type="password" placeholder="New password" class="text-input" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button @click="editPassword = false" class="cancel-btn">Cancel</button>
+          <button @click="updatePassword" class="primary-btn">Save Password</button>
+        </div>
       </div>
     </div>
 
@@ -295,6 +310,11 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- Display reviews section for jobseekers -->
+    <div v-if="user.role === 'jobseeker'" class="reviews-section">
+      <JobseekerReviews :jobseekerId="user._id || user.id" />
     </div>
 
     <button @click="goBack" class="back-btn">
@@ -663,55 +683,44 @@ export default {
       aboutYourselfText,
       editAbout,
       closeEditAbout,
-      updateAbout,
+      updateAbout
     };
   },
 };
 </script>
 
 <style scoped>
-/* Base styles */
 .profile-container {
-  max-width: 500px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 20px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  color: #333;
 }
 
 .profile-title {
-  font-size: 28px;
-  font-weight: 600;
-  margin-bottom: 30px;
-  color: #2c3e50;
-  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #333;
 }
 
-.section-title {
-  font-size: 20px;
-  font-weight: 600;
-  margin: 20px 0;
-  color: #2c3e50;
-  border-bottom: 2px solid #eee;
-  padding-bottom: 10px;
-}
-
-/* Profile picture styles */
+/* Profile Picture Section */
 .profile-picture-section {
   display: flex;
-  flex-direction: column;
   align-items: center;
   margin-bottom: 30px;
 }
 
 .profile-picture-container {
-  width: 150px;
-  height: 150px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   overflow: hidden;
-  margin-bottom: 15px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  background-color: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20px;
   border: 3px solid #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .profile-picture {
@@ -723,34 +732,35 @@ export default {
 .profile-picture-placeholder {
   width: 100%;
   height: 100%;
-  background-color: #4CAF50;
-  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 36px;
+  background-color: #e0e0e0;
+  font-size: 2.5rem;
+  color: #777;
   font-weight: bold;
 }
 
 .upload-form {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 10px;
 }
 
 .file-upload-btn {
   background-color: #f5f5f5;
-  padding: 8px 15px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 14px;
+  color: #555;
   border: 1px solid #ddd;
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
   display: inline-block;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .file-upload-btn:hover {
-  background-color: #e9e9e9;
+  background-color: #e8e8e8;
 }
 
 .hidden-input {
@@ -758,415 +768,220 @@ export default {
 }
 
 .upload-btn {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   border: none;
   padding: 8px 15px;
-  border-radius: 20px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
-  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
 }
 
 .upload-btn:hover {
-  background-color: #45a049;
+  background-color: #3d9040;
 }
 
-/* Action buttons */
+/* Action Buttons */
 .action-buttons {
   display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-bottom: 30px;
-}
-
-.action-btn {
-  background-color: #f8f9fa;
-  color: #333;
-  border: 1px solid #ddd;
-  padding: 10px 20px;
-  border-radius: 25px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.action-btn:hover {
-  background-color: #e9ecef;
-  border-color: #ccc;
-}
-
-/* New Edit Profile Button */
-.edit-profile-btn-container {
-  display: flex;
-  justify-content: flex-end;
+  gap: 10px;
   margin-bottom: 20px;
 }
 
-.edit-profile-btn {
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  padding: 8px 20px;
-  border-radius: 25px;
+.action-btn {
+  background-color: #f5f5f5;
+  color: #555;
+  border: 1px solid #ddd;
+  padding: 10px 15px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
 }
 
-.edit-profile-btn:hover {
-  background-color: #45a049;
+.action-btn:hover {
+  background-color: #e8e8e8;
+  color: #333;
 }
 
-/* Complete profile alert */
+/* Complete Profile Alert */
 .complete-profile-alert {
-  background-color: #e7f5ff;
-  border-left: 4px solid #339af0;
+  background-color: #fff9c4;
+  border-left: 4px solid #ffc107;
   padding: 15px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   border-radius: 4px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 15px;
 }
 
 .complete-profile-alert p {
-  margin: 0;
-  color: #1971c2;
-  font-size: 15px;
+  margin: 0 0 10px 0;
+  color: #5d4037;
 }
 
-/* Form styles */
+/* Profile Form */
 .profile-form-container {
   background-color: #f9f9f9;
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 30px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+  padding: 25px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  margin: 0 auto 30px auto;
 }
 
-.profile-form {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
+.section-title {
+  font-size: 1.3rem;
+  margin-top: 0;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+  color: #333;
 }
 
 .form-group {
-  margin-bottom: 15px;
-}
-
-.form-group.full-width {
-  grid-column: span 2;
+  margin-bottom: 20px;
 }
 
 .form-group label {
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
-  color: #495057;
+  color: #444;
 }
 
-.text-input {
+.text-input, .custom-select select {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  font-size: 15px;
-  transition: border-color 0.2s;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  transition: border-color 0.2s ease;
 }
 
-.text-input:focus {
-  border-color: #4CAF50;
+.text-input:focus, .custom-select select:focus {
+  border-color: #4caf50;
   outline: none;
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
 }
 
-/* Text area for About section */
-.text-area {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  font-size: 15px;
-  transition: border-color 0.2s;
-  resize: vertical;
-  font-family: inherit;
-}
-
-.text-area:focus {
-  border-color: #4CAF50;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
-}
-
-/* Custom select */
 .custom-select {
   position: relative;
-  width: 100%;
 }
 
 .custom-select select {
   appearance: none;
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  font-size: 15px;
   background-color: white;
   cursor: pointer;
 }
 
-.custom-select select:focus {
-  border-color: #4CAF50;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
-}
-
 .custom-select::after {
-  content: '▼';
+  content: "▼";
   font-size: 12px;
-  color: #495057;
+  color: #666;
   position: absolute;
-  right: 10px;
+  right: 12px;
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
 }
 
-/* Modern checkboxes */
 .modern-checkbox-group {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 10px;
 }
 
 .modern-checkbox {
-  position: relative;
-  padding-left: 30px;
-  cursor: pointer;
+  display: flex;
+  align-items: center;
   margin-bottom: 8px;
 }
 
 .modern-checkbox input[type="checkbox"] {
-  position: absolute;
-  opacity: 0;
-  cursor: pointer;
-  height: 0;
-  width: 0;
-}
-
-.checkbox-custom {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 20px;
-  width: 20px;
-  background-color: white;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  transition: all 0.2s;
-}
-
-.modern-checkbox:hover input ~ .checkbox-custom {
-  border-color: #4CAF50;
-}
-
-.modern-checkbox input:checked ~ .checkbox-custom {
-  background-color: #4CAF50;
-  border-color: #4CAF50;
-}
-
-.checkbox-custom:after {
-  content: "";
-  position: absolute;
   display: none;
 }
 
-.modern-checkbox input:checked ~ .checkbox-custom:after {
-  display: block;
+.checkbox-custom {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  display: inline-block;
+  position: relative;
+  margin-right: 10px;
+  transition: all 0.2s ease;
 }
 
-.modern-checkbox .checkbox-custom:after {
-  left: 7px;
-  top: 3px;
-  width: 5px;
-  height: 10px;
-  border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+.modern-checkbox input[type="checkbox"]:checked + label .checkbox-custom {
+  background-color: #4caf50;
+  border-color: #4caf50;
 }
 
-/* Buttons */
-.primary-btn {
-  padding: 10px 20px;
-  background-color: #4CAF50;
+.modern-checkbox input[type="checkbox"]:checked + label .checkbox-custom::after {
+  content: "✓";
   color: white;
-  border: none;
-  border-radius: 25px;
-  font-size: 15px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  width: fit-content;
+  position: absolute;
+  left: 5px;
+  top: -2px;
 }
 
-.primary-btn:hover {
-  background-color: #45a049;
+.text-area {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  resize: vertical;
+  min-height: 120px;
+  transition: border-color 0.2s ease;
 }
 
-.cancel-btn {
-  padding: 10px 20px;
-  background-color: #f1f3f5;
-  color: #495057;
-  border: 1px solid #ced4da;
-  border-radius: 25px;
-  font-size: 15px;
-  cursor: pointer;
-  transition: all 0.3s ease;
+.text-area:focus {
+  border-color: #4caf50;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
 }
 
-.cancel-btn:hover {
-  background-color: #e9ecef;
+.full-width {
+  grid-column: 1 / -1;
 }
 
-.back-btn {
-  margin-top: 30px;
-  background: none;
-  border: none;
-  color: #6c757d;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  font-size: 15px;
-  transition: color 0.2s;
-}
-
-.back-btn:hover {
-  color: #343a40;
-}
-
-/* Form actions */
 .form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 15px;
-  grid-column: span 2;
+  margin-top: 20px;
 }
 
-/* Modal forms */
-.modal-form {
-  background-color: #f9f9f9;
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 30px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  max-width: 400px;
-  margin: 0 auto 30px;
-}
-
-.modal-form .text-input {
-  margin-bottom: 15px;
-}
-
-/* Profile info display */
-.profile-info {
-  background-color: #f9f9f9;
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 30px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px 30px;
-}
-
-.info-item {
-  margin-bottom: 10px;
-}
-
-.info-item.full-width {
-  grid-column: span 2;
-}
-
-.info-label {
-  display: block;
-  font-size: 14px;
-  color: #6c757d;
-  margin-bottom: 5px;
-}
-
-.info-value {
+.cancel-btn, .primary-btn {
+  padding: 12px 20px;
+  border-radius: 6px;
   font-size: 16px;
-  color: #212529;
-}
-
-.info-value.empty {
-  color: #adb5bd;
-  font-style: italic;
-}
-
-/* About content styling */
-.about-content {
-  background-color: #f8f9fa;
-  padding: 12px;
-  border-radius: 4px;
-  margin: 5px 0;
-  position: relative;
-}
-
-.about-content p {
-  margin: 0;
-  line-height: 1.5;
-  white-space: pre-line;
-}
-
-.edit-about-btn {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
-  color: #495057;
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  border: none;
 }
 
-.edit-about-btn:hover {
-  background-color: #e9ecef;
-  border-color: #ced4da;
+.cancel-btn {
+  background-color: #f1f1f1;
+  color: #666;
 }
 
-/* Tags for skills display */
-.tags-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+.cancel-btn:hover {
+  background-color: #e0e0e0;
 }
 
-.tag {
-  background-color: #e9ecef;
-  color: #495057;
-  padding: 5px 12px;
-  border-radius: 20px;
-  font-size: 14px;
-  display: inline-block;
+.primary-btn {
+  background-color: #4caf50;
+  color: white;
 }
 
-/* Modal Overlay */
+.primary-btn:hover {
+  background-color: #3d9040;
+}
+
+/* Modal styles */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -1175,8 +990,8 @@ export default {
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   z-index: 1000;
 }
 
@@ -1184,27 +999,29 @@ export default {
   background-color: white;
   border-radius: 8px;
   width: 90%;
-  max-width: 500px;
-  max-height: 90vh;
+  max-width: 450px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  display: flex;
-  flex-direction: column;
   overflow: hidden;
+  animation: modalFadeIn 0.3s;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .modal-header {
-  padding: 15px 20px;
-  border-bottom: 1px solid #eee;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
 }
 
 .modal-title {
   margin: 0;
   font-size: 18px;
-  font-weight: 600;
-  color: #2c3e50;
+  color: #333;
 }
 
 .modal-close-btn {
@@ -1220,75 +1037,215 @@ export default {
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  transition: all 0.2s;
+  transition: background-color 0.2s ease;
 }
 
 .modal-close-btn:hover {
   background-color: #f5f5f5;
-  color: #333;
+  color: #666;
 }
 
 .modal-body {
   padding: 20px;
-  overflow-y: auto;
-}
-
-.modal-body .text-area {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 15px;
-  resize: vertical;
-  min-height: 150px;
-  font-family: inherit;
-  line-height: 1.5;
-}
-
-.modal-body .text-area:focus {
-  border-color: #4CAF50;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
 }
 
 .modal-footer {
-  padding: 15px 20px;
-  border-top: 1px solid #eee;
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+  padding: 16px 20px;
+  border-top: 1px solid #eee;
 }
 
-/* Prevent body scrolling when modal is open */
-.body-no-scroll {
-  overflow: hidden;
+.form-field {
+  margin-bottom: 16px;
 }
 
-/* Responsive adjustments */
+.form-field label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #444;
+}
+
+/* Display Profile Information */
+.profile-info {
+  background-color: white;
+  border-radius: 10px;
+  padding: 25px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.edit-profile-btn-container {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.edit-profile-btn {
+  background-color: #f5f5f5;
+  color: #555;
+  border: 1px solid #ddd;
+  padding: 8px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.edit-profile-btn:hover {
+  background-color: #e8e8e8;
+  color: #333;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-label {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.info-value {
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.info-value.empty {
+  color: #999;
+  font-style: italic;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.tag {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  padding: 5px 10px;
+  border-radius: 16px;
+  font-size: 0.9rem;
+}
+
+.about-content {
+  position: relative;
+}
+
+.edit-about-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: none;
+  border: none;
+  color: #4caf50;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 5px;
+}
+
+.edit-about-btn:hover {
+  text-decoration: underline;
+}
+
+/* Back Button */
+.back-btn {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+  transition: color 0.2s ease;
+}
+
+.back-btn:hover {
+  color: #333;
+}
+
+/* Reviews Section */
+.reviews-section {
+  margin-top: 30px;
+  background-color: white;
+  border-radius: 10px;
+  padding: 25px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive styles */
 @media (max-width: 768px) {
-  .profile-form {
-    grid-template-columns: 1fr;
-  }
-  
-  .form-group.full-width {
-    grid-column: span 1;
-  }
-  
   .info-grid {
     grid-template-columns: 1fr;
-  }
-  
-  .info-item.full-width {
-    grid-column: span 1;
   }
   
   .modern-checkbox-group {
     grid-template-columns: 1fr;
   }
   
-  .action-buttons {
+  .profile-picture-section {
     flex-direction: column;
     align-items: center;
+  }
+  
+  .profile-picture-container {
+    margin-right: 0;
+    margin-bottom: 15px;
+  }
+  
+  .edit-profile-btn-container {
+    position: static;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+/* Two-column layout styles */
+.two-column-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two equal columns */
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.profile-column {
+  width: 100%;
+}
+
+.reviews-column {
+  width: 100%;
+}
+
+.profile-info, .reviews-section {
+  height: 100%;
+  background-color: white;
+  border-radius: 10px;
+  padding: 25px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Make the layout stack on mobile */
+@media (max-width: 992px) {
+  .two-column-layout {
+    grid-template-columns: 1fr; /* Single column on smaller screens */
   }
 }
 </style>
