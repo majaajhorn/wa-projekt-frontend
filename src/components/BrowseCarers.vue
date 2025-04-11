@@ -248,6 +248,23 @@
               {{ selectedCarer.email }}
             </p>
           </div>
+          <div class="rating-container">
+            <div class="star-rating">
+              <template v-for="i in 5" :key="i">
+                <span 
+                  class="star"
+                  :class="{
+                    'filled': i <= Math.floor(selectedCarer.averageRating || 0), 
+                    'half-filled': (i - 0.5) === Math.floor((selectedCarer.averageRating || 0) * 2) / 2
+                  }"
+                >★</span>
+              </template>
+            </div>
+            <span class="rating-text">
+              {{ selectedCarer.averageRating ? selectedCarer.averageRating.toFixed(1) : '0.0' }}
+              ({{ selectedCarer.reviewCount || 0 }} review{{ selectedCarer.reviewCount !== 1 ? 's' : '' }})
+            </span>
+          </div>
         </div>
         
         <div class="profile-body">
@@ -318,6 +335,7 @@
 
 <script>
 import apiClient from '../api/axios';
+import { reviewService } from '../services/reviewService';
 
 export default {
   name: 'BrowseCarers',
@@ -341,7 +359,8 @@ export default {
         location: '',
       },
       selectedCarer: null,
-      defaultProfileImage: '/src/assets/default-profile.png'
+      defaultProfileImage: '/src/assets/default-profile.png',
+      reviewService: reviewService
     };
   },
   methods: {
@@ -521,6 +540,24 @@ export default {
       console.log('Showing profile for:', carer.fullName);
       this.selectedCarer = carer;
       document.body.style.overflow = 'hidden'; // Prevent scrolling when modal is open
+      this.fetchCarerReviews(carer);
+    },
+
+    async fetchCarerReviews(carer) {
+      try {
+        // Fetch reviews for this carer/jobseeker
+        const response = await this.reviewService.getJobseekerReviews(carer._id);
+        if (response.data) {
+          // Update the selectedCarer object with review data
+          this.selectedCarer.averageRating = response.data.averageRating || 0;
+          this.selectedCarer.reviewCount = response.data.reviewCount || 0;
+        }
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
+        // Set defaults if error occurs
+        this.selectedCarer.averageRating = 0;
+        this.selectedCarer.reviewCount = 0;
+      }
     },
     
     closeProfile() {
@@ -579,6 +616,7 @@ export default {
   }
 };
 </script>
+
 <style scoped>
 /* Main container */
 .browse-carers-container {
@@ -1313,6 +1351,46 @@ export default {
   .profile-details-grid,
   .profile-list {
     grid-template-columns: 1fr;
+  }
+
+  .rating-container {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+  }
+
+  .star-rating {
+    display: flex;
+    margin-right: 8px;
+  }
+
+  .star {
+    color: #e0e0e0;
+    font-size: 1.2rem;
+  }
+
+  .star.filled {
+    color: #ffc107;
+  }
+
+  .star.half-filled {
+    position: relative;
+    color: #e0e0e0;
+  }
+
+  .star.half-filled::after {
+    content: '★';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 50%;
+    overflow: hidden;
+    color: #ffc107;
+  }
+
+  .rating-text {
+    color: #666;
+    font-size: 0.9rem;
   }
 }
 </style>
