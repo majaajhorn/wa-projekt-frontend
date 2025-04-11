@@ -14,12 +14,14 @@ import About from '../components/About.vue';
 import BrowseCarers from '../components/BrowseCarers.vue';
 import ApplicationDetails from '../components/ApplicationDetails.vue';
 import ApplyJob from '../components/ApplyJob.vue';
-import AllApplications from '../components/AllApplications.vue'
+import AllApplications from '../components/AllApplications.vue';
+import ForgotPassword from '../components/ForgotPassword.vue'; // Import the ForgotPassword component
 
 const routes = [
   { path: '/', component: Home },
   { path: '/login', component: LoginForm },
   { path: '/register', component: RegisterForm },
+  { path: '/forgot-password', component: ForgotPassword }, // Add the forgot-password route
   { path: '/jobseeker-dashboard', component: JobseekerDashboard, meta: { requiresAuth: true } },
   { path: '/my-profile', component: MyProfile, meta: { requiresAuth: true } },
   { path: '/job-search', component: JobSearch, meta: { requiresAuth: true } },
@@ -35,7 +37,6 @@ const routes = [
   // Modified BrowseCarers route to handle both public and authenticated access
   { path: '/browse-carers', component: BrowseCarers, meta: { requiresAuthForEmployers: true } },
   { path: '/all-applications', name: 'AllApplications', component: AllApplications, meta: { requiresAuth: true, employerOnly: true } },
-  
 ];
 
 const router = createRouter({

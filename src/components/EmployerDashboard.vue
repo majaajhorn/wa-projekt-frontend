@@ -1,4 +1,8 @@
 <template>
+  <div v-if="showChangePasswordForm">
+    <ChangePassword @password-changed="handlePasswordChanged" />
+  </div>
+
   <div class="dashboard-container">
     <h1 class="dashboard-title">Employer Dashboard</h1>
     
@@ -183,6 +187,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import apiClient from '../api/axios.js';
 import { applicationStatusService } from '../services/applicationStatusService';
+import ChangePassword from './ChangePassword.vue'; // Import the component
 
 export default {
   name: 'EmployerDashboard',
@@ -201,6 +206,8 @@ export default {
     const loadingApplications = ref(false);
     const jobsSection = ref(null);
     const applicationsSection = ref(null);
+
+    const showChangePasswordForm = ref(false);
 
     // Filter jobs based on status
     const filteredJobs = computed(() => {
@@ -728,11 +735,21 @@ export default {
       }
     };
 
+    const handlePasswordChanged = () => {
+      showChangePasswordForm.value = false;
+    };
+
     // Fetch jobs and applications when component is mounted
     onMounted(() => {
       fetchJobs().then(() => {
         fetchRecentApplications();
       });
+
+      // Check if user has a temporary password
+      const userData = JSON.parse(localStorage.getItem('user'));
+      if (userData && userData.passwordTemporary) {
+        showChangePasswordForm.value = true;
+      }
     });
 
     return {

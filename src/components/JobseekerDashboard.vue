@@ -1,4 +1,8 @@
 <template>
+  <div v-if="showChangePasswordForm">
+    <ChangePassword @password-changed="handlePasswordChanged" />
+  </div>
+
   <div class="dashboard-container">
     <h1 class="dashboard-title">Jobseeker Dashboard</h1>
     
@@ -185,9 +189,13 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import apiClient from '../api/axios.js';
+import ChangePassword from './ChangePassword.vue'; // Import the component
 
 export default {
   name: 'JobseekerDashboard',
+  components: {
+    ChangePassword
+  },
   setup() {
     const router = useRouter();
     
@@ -207,6 +215,9 @@ export default {
     const savedJobsCount = ref(0);
     const showRemoveModal = ref(false);
     const jobToRemove = ref(null);
+
+    // Password change
+    const showChangePasswordForm = ref(false);
     
     // Profile stats
     const profileViews = ref(0);
@@ -420,12 +431,22 @@ export default {
         });
       }
     };
+
+    const handlePasswordChanged = () => {
+      showChangePasswordForm.value = false;
+    };
     
     // Fetch data when component is mounted
     onMounted(() => {
       fetchApplications();
       fetchSavedJobs();
       fetchProfileStats();
+
+      // Check if user has a temporary password
+      const userData = JSON.parse(localStorage.getItem('user'));
+      if (userData && userData.passwordTemporary) {
+        showChangePasswordForm.value = true;
+      }
     });
     
     return {
@@ -449,6 +470,10 @@ export default {
       
       // Profile
       profileViews,
+      
+      // Password change
+      showChangePasswordForm,
+      handlePasswordChanged,
       
       // Functions
       formatDate,
