@@ -221,98 +221,98 @@
     </div>
     
     <!-- Profile Modal -->
-<div v-if="selectedCarer" class="profile-modal-overlay" @click="closeProfile">
-  <div class="profile-modal-content" @click.stop>
-    <button class="close-modal-button" @click="closeProfile">✕</button>
-    
-    <div class="profile-header">
-      <div class="profile-image">
-        <img 
-          v-if="selectedCarer.profilePicture" 
-          :src="selectedCarer.profilePicture" 
-          alt="Profile picture"
-          @error="handleImageError($event, selectedCarer)"
-        />
-        <div v-else class="profile-initials">
-          {{ getInitials(selectedCarer.fullName) }}
-        </div>
-      </div>
-      <div class="profile-titles">
-        <h2 class="profile-name">{{ selectedCarer.fullName }}</h2>
-        <p class="profile-location">
-          <span class="location-icon">📍</span> 
-          {{ selectedCarer.profileData?.location || 'Location not specified' }}
-        </p>
-        <p class="profile-email">
-          <span class="email-icon">✉️</span> 
-          {{ selectedCarer.email }}
-        </p>
-      </div>
-    </div>
-    
-    <div class="profile-body">
-      <!-- About section -->
-      <div class="profile-section" v-if="selectedCarer.profileData?.aboutYourself">
-        <h3 class="profile-section-title">About</h3>
-        <p class="profile-about">{{ selectedCarer.profileData.aboutYourself }}</p>
-      </div>
-      
-      <!-- Description section if available -->
-      <div class="profile-section" v-if="selectedCarer.profileData?.description">
-        <p class="profile-description">{{ selectedCarer.profileData.description }}</p>
-      </div>
-    
-      <!-- Key details section -->
-      <div class="profile-section">
-        <h3 class="profile-section-title">Key Details</h3>
-        <div class="profile-details-grid">
-          <div class="profile-detail-item">
-            <div class="detail-label">English Level</div>
-            <div class="detail-value">{{ formatText(selectedCarer.profileData?.englishLevel) || 'Not specified' }}</div>
+    <div v-if="selectedCarer" class="profile-modal-overlay" @click="closeProfile">
+      <div class="profile-modal-content" @click.stop>
+        <button class="close-modal-button" @click="closeProfile">✕</button>
+        
+        <div class="profile-header">
+          <div class="profile-image">
+            <img 
+              v-if="selectedCarer.profilePicture" 
+              :src="selectedCarer.profilePicture" 
+              alt="Profile picture"
+              @error="handleImageError($event, selectedCarer)"
+            />
+            <div v-else class="profile-initials">
+              {{ getInitials(selectedCarer.fullName) }}
+            </div>
           </div>
-          <div class="profile-detail-item">
-            <div class="detail-label">Live-in Experience</div>
-            <div class="detail-value">{{ formatText(selectedCarer.profileData?.liveInExperience) || 'No' }}</div>
-          </div>
-          <div class="profile-detail-item">
-            <div class="detail-label">Driving License</div>
-            <div class="detail-value">{{ selectedCarer.profileData?.drivingLicence ? 'Yes' : 'No' }}</div>
-          </div>
-          <div class="profile-detail-item">
-            <div class="detail-label">Gender</div>
-            <div class="detail-value">{{ capitalize(selectedCarer.profileData?.gender) || 'Not specified' }}</div>
+          <div class="profile-titles">
+            <h2 class="profile-name">{{ selectedCarer.fullName }}</h2>
+            <p class="profile-location">
+              <span class="location-icon">📍</span> 
+              {{ selectedCarer.profileData?.location || 'Location not specified' }}
+            </p>
+            <p class="profile-email">
+              <span class="email-icon">✉️</span> 
+              {{ selectedCarer.email }}
+            </p>
           </div>
         </div>
-      </div>
-      
-      <!-- Qualifications section -->
-      <div class="profile-section" v-if="selectedCarer.profileData?.qualification && selectedCarer.profileData.qualification.length > 0">
-        <h3 class="profile-section-title">Qualifications</h3>
-        <ul class="profile-list">
-          <li v-for="(qual, index) in formatText(selectedCarer.profileData.qualification)" :key="index">
-            {{ qual }}
-          </li>
-        </ul>
-      </div>
-      
-      <!-- Care Experience section -->
-      <div class="profile-section" v-if="selectedCarer.profileData?.careExperience && selectedCarer.profileData.careExperience.length > 0">
-        <h3 class="profile-section-title">Care Experience</h3>
-        <ul class="profile-list">
-          <li v-for="(exp, index) in formatText(selectedCarer.profileData.careExperience)" :key="index">
-            {{ exp }}
-          </li>
-        </ul>
+        
+        <div class="profile-body">
+          <!-- About section -->
+          <div class="profile-section" v-if="selectedCarer.profileData?.aboutYourself">
+            <h3 class="profile-section-title">About</h3>
+            <p class="profile-about">{{ selectedCarer.profileData.aboutYourself }}</p>
+          </div>
+          
+          <!-- Description section if available -->
+          <div class="profile-section" v-if="selectedCarer.profileData?.description">
+            <p class="profile-description">{{ selectedCarer.profileData.description }}</p>
+          </div>
+        
+          <!-- Key details section -->
+          <div class="profile-section">
+            <h3 class="profile-section-title">Key Details</h3>
+            <div class="profile-details-grid">
+              <div class="profile-detail-item">
+                <div class="detail-label">English Level</div>
+                <div class="detail-value">{{ formatText(selectedCarer.profileData?.englishLevel) || 'Not specified' }}</div>
+              </div>
+              <div class="profile-detail-item">
+                <div class="detail-label">Live-in Experience</div>
+                <div class="detail-value">{{ formatText(selectedCarer.profileData?.liveInExperience) || 'No' }}</div>
+              </div>
+              <div class="profile-detail-item">
+                <div class="detail-label">Driving License</div>
+                <div class="detail-value">{{ selectedCarer.profileData?.drivingLicence ? 'Yes' : 'No' }}</div>
+              </div>
+              <div class="profile-detail-item">
+                <div class="detail-label">Gender</div>
+                <div class="detail-value">{{ capitalize(selectedCarer.profileData?.gender) || 'Not specified' }}</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Qualifications section -->
+          <div class="profile-section" v-if="selectedCarer.profileData?.qualification && selectedCarer.profileData.qualification.length > 0">
+            <h3 class="profile-section-title">Qualifications</h3>
+            <ul class="profile-list">
+              <li v-for="(qual, index) in formatText(selectedCarer.profileData.qualification)" :key="index">
+                {{ qual }}
+              </li>
+            </ul>
+          </div>
+          
+          <!-- Care Experience section -->
+          <div class="profile-section" v-if="selectedCarer.profileData?.careExperience && selectedCarer.profileData.careExperience.length > 0">
+            <h3 class="profile-section-title">Care Experience</h3>
+            <ul class="profile-list">
+              <li v-for="(exp, index) in formatText(selectedCarer.profileData.careExperience)" :key="index">
+                {{ exp }}
+              </li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="profile-footer">
+          <button class="contact-button-large" @click="contactCarer(selectedCarer)">
+            <span class="contact-icon">✉️</span> Contact {{ selectedCarer.fullName.split(' ')[0] }}
+          </button>
+        </div>
       </div>
     </div>
-    
-    <div class="profile-footer">
-      <button class="contact-button-large">
-        <span class="contact-icon">✉️</span> Contact {{ selectedCarer.fullName.split(' ')[0] }}
-      </button>
-    </div>
-  </div>
-  </div>
   </div>
 </template>
 
@@ -490,11 +490,11 @@ export default {
     },
     
     handleImageError(event, carer) {
-    // Instead of replacing with default image, we'll use v-if/v-else with initials
-    if (carer) {
-      carer.profilePicture = null; // Setting to null will trigger the v-else condition
-    } else {
-      event.target.style.display = 'none'; // Fallback if carer object is not provided
+      // Instead of replacing with default image, we'll use v-if/v-else with initials
+      if (carer) {
+        carer.profilePicture = null; // Setting to null will trigger the v-else condition
+      } else {
+        event.target.style.display = 'none'; // Fallback if carer object is not provided
       }
     },
     
@@ -554,6 +554,24 @@ export default {
         .toUpperCase()
         .slice(0, 2);
     },
+    
+    // New method to handle contact functionality
+    contactCarer(carer) {
+      if (!carer || !carer.email) {
+        alert('Email not available for this carer');
+        return;
+      }
+      
+      // Create mailto link with subject and body
+      const subject = `Inquiry about care services - via Care Portal`;
+      const body = `Hello ${carer.fullName},\n\nI found your profile on the Care Portal and I'm interested in discussing potential care services.\n\nBest regards,\n[Your Name]`;
+      
+      // Encode parameters for mailto URL
+      const mailtoLink = `mailto:${carer.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      
+      // Open user's default email client
+      window.location.href = mailtoLink;
+    }
   },
   mounted() {
     console.log('BrowseCarers component mounted');
@@ -561,7 +579,6 @@ export default {
   }
 };
 </script>
-
 <style scoped>
 /* Main container */
 .browse-carers-container {
