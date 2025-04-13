@@ -14,20 +14,32 @@ ntankovic.unipu.hr
 
 ### Korisnik (njegovatelj):
 •	Registracija i prijava u sustav
+
 •	Upravljanje profilom (ažuriranje podataka, postavljanje fotografije)
+
 •	Pretraživanje poslova prema kriterijima
+
 •	Spremanje zanimljivih poslova, brisanje istih
+
 •	Prijava na poslove
+
 •	Pregled statusa prijave
 
 ### Korisnik (poslodavac):
 •	Registracija i prijava u sustav
+
 •	Upravljanje profilom
+
 •	Objava novih poslova
+
 •	Pregled prijava za poslove
+
 •	Ažuriranje statusa prijava
+
 •	Brisanje/uređivanje objavljenih poslova
+
 •	Pretraživanje kandidata
+
 •	Ocjenjivanje njegovatelja
 
 ## Prijava
