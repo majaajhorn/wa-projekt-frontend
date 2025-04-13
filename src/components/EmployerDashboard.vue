@@ -1613,7 +1613,7 @@ export default {
   position: absolute;
   top: 5px;
   right: 5px;
-  background-color: #4299e1;
+  background-color: #4caf50;
   color: white;
   border-radius: 50%;
   padding: 2px 6px;
