@@ -220,116 +220,7 @@
       </div>
     </div>
     
-    <!-- Profile Modal -->
-    <div v-if="selectedCarer" class="profile-modal-overlay" @click="closeProfile">
-      <div class="profile-modal-content" @click.stop>
-        <button class="close-modal-button" @click="closeProfile">✕</button>
-        
-        <div class="profile-header">
-          <div class="profile-image">
-            <img 
-              v-if="selectedCarer.profilePicture" 
-              :src="selectedCarer.profilePicture" 
-              alt="Profile picture"
-              @error="handleImageError($event, selectedCarer)"
-            />
-            <div v-else class="profile-initials">
-              {{ getInitials(selectedCarer.fullName) }}
-            </div>
-          </div>
-          <div class="profile-titles">
-            <h2 class="profile-name">{{ selectedCarer.fullName }}</h2>
-            <p class="profile-location">
-              <span class="location-icon">📍</span> 
-              {{ selectedCarer.profileData?.location || 'Location not specified' }}
-            </p>
-            <p class="profile-email">
-              <span class="email-icon">✉️</span> 
-              {{ selectedCarer.email }}
-            </p>
-          </div>
-          <div class="rating-container">
-            <div class="star-rating">
-              <template v-for="i in 5" :key="i">
-                <span 
-                  class="star"
-                  :class="{
-                    'filled': i <= Math.floor(selectedCarer.averageRating || 0), 
-                    'half-filled': (i - 0.5) === Math.floor((selectedCarer.averageRating || 0) * 2) / 2
-                  }"
-                >★</span>
-              </template>
-            </div>
-            <span class="rating-text">
-              {{ selectedCarer.averageRating ? selectedCarer.averageRating.toFixed(1) : '0.0' }}
-              ({{ selectedCarer.reviewCount || 0 }} review{{ selectedCarer.reviewCount !== 1 ? 's' : '' }})
-            </span>
-          </div>
-        </div>
-        
-        <div class="profile-body">
-          <!-- About section -->
-          <div class="profile-section" v-if="selectedCarer.profileData?.aboutYourself">
-            <h3 class="profile-section-title">About</h3>
-            <p class="profile-about">{{ selectedCarer.profileData.aboutYourself }}</p>
-          </div>
-          
-          <!-- Description section if available -->
-          <div class="profile-section" v-if="selectedCarer.profileData?.description">
-            <p class="profile-description">{{ selectedCarer.profileData.description }}</p>
-          </div>
-        
-          <!-- Key details section -->
-          <div class="profile-section">
-            <h3 class="profile-section-title">Key Details</h3>
-            <div class="profile-details-grid">
-              <div class="profile-detail-item">
-                <div class="detail-label">English Level</div>
-                <div class="detail-value">{{ formatText(selectedCarer.profileData?.englishLevel) || 'Not specified' }}</div>
-              </div>
-              <div class="profile-detail-item">
-                <div class="detail-label">Live-in Experience</div>
-                <div class="detail-value">{{ formatText(selectedCarer.profileData?.liveInExperience) || 'No' }}</div>
-              </div>
-              <div class="profile-detail-item">
-                <div class="detail-label">Driving License</div>
-                <div class="detail-value">{{ selectedCarer.profileData?.drivingLicence ? 'Yes' : 'No' }}</div>
-              </div>
-              <div class="profile-detail-item">
-                <div class="detail-label">Gender</div>
-                <div class="detail-value">{{ capitalize(selectedCarer.profileData?.gender) || 'Not specified' }}</div>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Qualifications section -->
-          <div class="profile-section" v-if="selectedCarer.profileData?.qualification && selectedCarer.profileData.qualification.length > 0">
-            <h3 class="profile-section-title">Qualifications</h3>
-            <ul class="profile-list">
-              <li v-for="(qual, index) in formatText(selectedCarer.profileData.qualification)" :key="index">
-                {{ qual }}
-              </li>
-            </ul>
-          </div>
-          
-          <!-- Care Experience section -->
-          <div class="profile-section" v-if="selectedCarer.profileData?.careExperience && selectedCarer.profileData.careExperience.length > 0">
-            <h3 class="profile-section-title">Care Experience</h3>
-            <ul class="profile-list">
-              <li v-for="(exp, index) in formatText(selectedCarer.profileData.careExperience)" :key="index">
-                {{ exp }}
-              </li>
-            </ul>
-          </div>
-        </div>
-        
-        <div class="profile-footer">
-          <button class="contact-button-large" @click="contactCarer(selectedCarer)">
-            <span class="contact-icon">✉️</span> Contact {{ selectedCarer.fullName.split(' ')[0] }}
-          </button>
-        </div>
-      </div>
-    </div>
+    
   </div>
 </template>
 
@@ -537,12 +428,12 @@ export default {
     },
     
     showProfile(carer) {
-      console.log('Showing profile for:', carer.fullName);
-      this.selectedCarer = carer;
-      document.body.style.overflow = 'hidden'; // Prevent scrolling when modal is open
-      this.fetchCarerReviews(carer);
+      console.log('Navigating to profile for:', carer.fullName);
+      // Navigate to the jobseeker profile page instead of showing modal
+      this.$router.push(`/jobseeker-profile/${carer._id}`);
     },
 
+    /*
     async fetchCarerReviews(carer) {
       try {
         // Fetch reviews for this carer/jobseeker
@@ -564,7 +455,7 @@ export default {
       this.selectedCarer = null;
       document.body.style.overflow = ''; // Re-enable scrolling
     },
-    
+    */
     // Helper method to check if carer has specific experience or qualification
     hasExperience(carer, skill) {
       if (!carer.profileData) return false;
