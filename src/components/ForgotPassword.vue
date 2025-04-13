@@ -149,14 +149,14 @@ input {
 }
 
 input:focus {
-  border-color: #4a6ee0;
+  border-color: #4299e1;
   outline: none;
 }
 
 .submit-button {
   width: 100%;
   padding: 14px;
-  background-color: #4a6ee0;
+  background-color: #4299e1;
   color: white;
   border: none;
   border-radius: 5px;
@@ -167,7 +167,7 @@ input:focus {
 }
 
 .submit-button:hover {
-  background-color: #3d5cbe;
+  background-color: #007ce2;
 }
 
 .submit-button:disabled {
@@ -184,8 +184,8 @@ input:focus {
 
 .message.success {
   background-color: #e7f7ed;
-  color: #28a745;
-  border: 1px solid #a3d9b0;
+  color: #4299e1;
+  border: 1px solid #007ce2;
 }
 
 .message.error {
@@ -201,7 +201,7 @@ input:focus {
 }
 
 .link {
-  color: #4a6ee0;
+  color: #4299e1;
   text-decoration: none;
   font-weight: 500;
 }
@@ -219,7 +219,7 @@ input:focus {
   width: 60px;
   height: 60px;
   line-height: 60px;
-  background-color: #28a745;
+  background-color: #007ce2;
   color: white;
   font-size: 30px;
   border-radius: 50%;
@@ -253,7 +253,7 @@ input:focus {
 .login-button {
   display: inline-block;
   padding: 10px 20px;
-  background-color: #4a6ee0;
+  background-color: #4299e1;
   color: white;
   text-decoration: none;
   border-radius: 5px;
@@ -262,6 +262,6 @@ input:focus {
 }
 
 .login-button:hover {
-  background-color: #3d5cbe;
+  background-color: #007ce2;
 }
 </style>

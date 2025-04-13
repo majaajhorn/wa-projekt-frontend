@@ -121,7 +121,7 @@
     </div>
   </template>
   
-  <script>
+<script>
   import { ref, reactive, onMounted } from 'vue';
   import { useRouter } from 'vue-router';
   import apiClient from '../api/axios.js';
@@ -270,7 +270,7 @@
   };
   </script>
   
-  <style scoped>
+<style scoped>
   .job-post-container {
     max-width: 800px;
     margin: 0 auto;
@@ -331,7 +331,7 @@
   }
   
   .text-input:focus {
-    border-color: #4CAF50;
+    border-color: #4299e1;
     outline: none;
     box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
   }
@@ -348,7 +348,7 @@
   }
   
   .text-area:focus {
-    border-color: #4CAF50;
+    border-color: #4299e1;
     outline: none;
     box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
   }
@@ -371,7 +371,7 @@
   }
   
   .custom-select select:focus {
-    border-color: #4CAF50;
+    border-color: #4299e1;
     outline: none;
     box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
   }
@@ -422,12 +422,12 @@
   }
   
   .modern-checkbox:hover input ~ .checkbox-custom {
-    border-color: #4CAF50;
+    border-color: #4299e1;
   }
   
   .modern-checkbox input:checked ~ .checkbox-custom {
-    background-color: #4CAF50;
-    border-color: #4CAF50;
+    background-color: #4299e1;
+    border-color: #4299e1;
   }
   
   .checkbox-custom:after {
@@ -460,7 +460,7 @@
   
   .primary-btn {
     padding: 10px 20px;
-    background-color: #4CAF50;
+    background-color: #4299e1;
     color: white;
     border: none;
     border-radius: 25px;
@@ -470,19 +470,19 @@
   }
   
   .primary-btn:hover {
-    background-color: #45a049;
+    background-color: #007ce2;
   }
   
   .primary-btn:disabled {
-    background-color: #a0d4a3;
+    background-color: rgb(157, 209, 255);
     cursor: not-allowed;
   }
   
   .secondary-btn {
     padding: 10px 20px;
     background-color: #f8f9fa;
-    color: #4CAF50;
-    border: 1px solid #4CAF50;
+    color: #4299e1;
+    border: 1px solid #4299e1;
     border-radius: 25px;
     font-size: 15px;
     cursor: pointer;
@@ -513,7 +513,7 @@
   /* Alerts */
   .success-alert {
     background-color: #e8f5e9;
-    border-left: 4px solid #4CAF50;
+    border-left: 4px solid #4299e1;
     padding: 20px;
     margin-bottom: 30px;
     border-radius: 4px;
@@ -521,7 +521,7 @@
   
   .success-alert p {
     margin: 0 0 15px 0;
-    color: #2e7d32;
+    color: #92cdfe;
     font-size: 16px;
   }
   

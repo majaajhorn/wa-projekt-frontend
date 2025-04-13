@@ -274,9 +274,9 @@
       };
     }
   };
-  </script>
+</script>
   
-  <style scoped>
+<style scoped>
   .edit-job-container {
     max-width: 1000px;
     margin: 0 auto;
@@ -296,7 +296,7 @@
   }
   
   .back-link a {
-    color: #4CAF50;
+    color: #4299e1;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
@@ -383,7 +383,7 @@
   
   .save-btn {
     padding: 12px 30px;
-    background-color: #4CAF50;
+    background-color: #4299e1;
     color: white;
     border: none;
     border-radius: 4px;
@@ -392,7 +392,7 @@
   }
   
   .save-btn:hover {
-    background-color: #45a049;
+    background-color: #007ce2;
   }
   
   /* Loading Indicator */

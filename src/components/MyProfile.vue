@@ -768,7 +768,7 @@ export default {
 }
 
 .upload-btn {
-  background-color: #4caf50;
+  background-color: #4299e1;
   color: white;
   border: none;
   padding: 8px 15px;
@@ -779,7 +779,7 @@ export default {
 }
 
 .upload-btn:hover {
-  background-color: #3d9040;
+  background-color: #007ce2;
 }
 
 /* Action Buttons */
@@ -859,9 +859,9 @@ export default {
 }
 
 .text-input:focus, .custom-select select:focus {
-  border-color: #4caf50;
+  border-color: #4299e1;
   outline: none;
-  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+  box-shadow: 0 0 0 2px rgba(49, 125, 255, 0.2);
 }
 
 .custom-select {
@@ -913,8 +913,8 @@ export default {
 }
 
 .modern-checkbox input[type="checkbox"]:checked + label .checkbox-custom {
-  background-color: #4caf50;
-  border-color: #4caf50;
+  background-color: #4299e1;
+  border-color: #4299e1;
 }
 
 .modern-checkbox input[type="checkbox"]:checked + label .checkbox-custom::after {
@@ -937,9 +937,9 @@ export default {
 }
 
 .text-area:focus {
-  border-color: #4caf50;
+  border-color: #4299e1;
   outline: none;
-  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+  box-shadow: 0 0 0 2px rgba(51, 85, 255, 0.2);
 }
 
 .full-width {
@@ -973,12 +973,12 @@ export default {
 }
 
 .primary-btn {
-  background-color: #4caf50;
+  background-color: #4299e1;
   color: white;
 }
 
 .primary-btn:hover {
-  background-color: #3d9040;
+  background-color: #007ce2;
 }
 
 /* Modal styles */
@@ -1137,7 +1137,7 @@ export default {
 
 .tag {
   background-color: #e8f5e9;
-  color: #2e7d32;
+  color: #4299e1;
   padding: 5px 10px;
   border-radius: 16px;
   font-size: 0.9rem;
@@ -1153,7 +1153,7 @@ export default {
   right: 0;
   background: none;
   border: none;
-  color: #4caf50;
+  color: #4299e1;
   cursor: pointer;
   font-size: 0.9rem;
   padding: 5px;

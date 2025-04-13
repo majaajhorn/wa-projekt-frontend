@@ -150,7 +150,7 @@
     </div>
   </template>
   
-  <script>
+<script>
   import { ref, computed, onMounted } from 'vue';
   import { useRoute } from 'vue-router';
   import apiClient from '../api/axios.js';
@@ -269,7 +269,7 @@
   };
   </script>
   
-  <style scoped>
+<style scoped>
   .profile-container {
     max-width: 1000px;
     margin: 0 auto;
@@ -290,7 +290,7 @@
   .retry-btn {
     margin-top: 15px;
     padding: 8px 16px;
-    background-color: #4caf50;
+    background-color: #4299e1;
     color: white;
     border: none;
     border-radius: 4px;
@@ -413,7 +413,7 @@
   }
   
   .review-btn {
-    background-color: #4caf50;
+    background-color: #4299e1;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -424,11 +424,11 @@
   }
   
   .review-btn:hover:not(:disabled) {
-    background-color: #3d8b40;
+    background-color: #007ce2;
   }
   
   .review-btn:disabled {
-    background-color: #a5d6a7;
+    background-color: #8dcbfd;
     cursor: not-allowed;
   }
   

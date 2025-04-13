@@ -364,11 +364,11 @@
   }
   
   .success-message {
-    color: #28a745;
+    color: #4299e1;
   }
   
   .success-message h2 {
-    color: #28a745;
+    color: #4299e1;
     margin-bottom: 15px;
   }
   
@@ -559,17 +559,17 @@
   }
   
   .submit-btn, .primary-btn {
-    background-color: #4CAF50;
+    background-color: #4299e1;
     color: white;
     flex-grow: 1;
   }
   
   .submit-btn:hover, .primary-btn:hover {
-    background-color: #45a049;
+    background-color: #007ce2;
   }
   
   .submit-btn:disabled {
-    background-color: #a5d6a7;
+    background-color: #99cbf4;
     cursor: not-allowed;
   }
   

@@ -427,7 +427,7 @@
   }
   
   .resume-link {
-    color: #4CAF50;
+    color: #4299e1;
     text-decoration: none;
   }
   
@@ -472,8 +472,8 @@
   }
   
   .timeline-point.active {
-    background-color: #4CAF50;
-    border-color: #4CAF50;
+    background-color: #4299e1;
+    border-color: #4299e1;
   }
   
   .timeline-content {
@@ -525,12 +525,12 @@
   }
   
   .action-btn {
-    background-color: #4CAF50;
+    background-color: #4299e1;
     color: white;
   }
   
   .action-btn:hover {
-    background-color: #45a049;
+    background-color: #007ce2;
   }
   
   .withdraw-btn {

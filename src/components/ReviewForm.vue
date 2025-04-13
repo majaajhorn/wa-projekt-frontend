@@ -47,9 +47,9 @@
         </form>
       </div>
     </div>
-  </template>
+</template>
   
-  <script>
+<script>
   import { ref, computed, onMounted } from 'vue';
   import { reviewService } from '../services/reviewService';
   
@@ -144,7 +144,7 @@
   };
   </script>
   
-  <style scoped>
+<style scoped>
   .review-form-container {
     background-color: #f9f9f9;
     border-radius: 8px;
@@ -233,7 +233,7 @@
   }
   
   .submit-btn {
-    background-color: #4caf50;
+    background-color: #4299e1;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -244,11 +244,11 @@
   }
   
   .submit-btn:hover:not(:disabled) {
-    background-color: #3d8b40;
+    background-color: #007ce2;
   }
   
   .submit-btn:disabled {
-    background-color: #a5d6a7;
+    background-color: #93ceff;
     cursor: not-allowed;
   }
   </style>

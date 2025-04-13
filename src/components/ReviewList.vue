@@ -64,7 +64,7 @@
     </div>
   </template>
   
-  <script>
+<script>
   import { ref, onMounted } from 'vue';
   import { reviewService } from '../services/reviewService';
   
@@ -129,7 +129,7 @@
   };
   </script>
   
-  <style scoped>
+<style scoped>
   .reviews-container {
     margin-top: 20px;
   }
@@ -264,4 +264,4 @@
     line-height: 1.5;
     color: #333;
   }
-  </style>
+</style>

@@ -46,7 +46,7 @@
     </div>
   </template>
   
-  <script>
+<script>
   import { ref, onMounted, onUnmounted } from 'vue';
   import { useRouter } from 'vue-router';
   import apiClient from '../api/axios.js';
@@ -234,7 +234,7 @@
   };
   </script>
   
-  <style scoped>
+<style scoped>
   .notification-bell {
     position: relative;
   }

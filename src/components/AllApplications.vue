@@ -428,9 +428,9 @@
   }
   
   .filter-btn.active {
-    background-color: #4CAF50;
+    background-color: #4299e1;
     color: white;
-    border-color: #4CAF50;
+    border-color: #4299e1;
   }
   
   .sort-select {

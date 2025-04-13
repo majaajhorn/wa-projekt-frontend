@@ -1138,7 +1138,7 @@ export default {
 .stat-number {
   font-size: 32px;
   font-weight: 700;
-  color: #4CAF50;
+  color: #4299e1;
   margin: 0;
 }
 
@@ -1163,12 +1163,12 @@ export default {
 }
 
 .action-btn.primary {
-  background-color: #4CAF50;
+  background-color: #4299e1;
   color: white;
 }
 
 .action-btn.primary:hover {
-  background-color: #45a049;
+  background-color: #007ce2;
 }
 
 .action-btn:not(.primary) {
@@ -1227,7 +1227,7 @@ export default {
 
 .filter-btn.active {
   background-color: #e9ecef;
-  color: #4CAF50;
+  color: #4299e1;
   font-weight: 500;
 }
 
@@ -1321,14 +1321,14 @@ export default {
   border: none;
   padding: 0;
   font-size: 14px;
-  color: #4CAF50;
+  color: #4299e1;
   cursor: pointer;
   transition: color 0.2s;
   text-decoration: none;
 }
 
 .action-link:hover {
-  color: #45a049;
+  color: #007ce2;
   text-decoration: underline;
 }
 
@@ -1354,7 +1354,7 @@ export default {
 
 .primary-btn {
   padding: 10px 20px;
-  background-color: #4CAF50;
+  background-color: #4299e1;
   color: white;
   border: none;
   border-radius: 25px;
@@ -1366,7 +1366,7 @@ export default {
 }
 
 .primary-btn:hover {
-  background-color: #45a049;
+  background-color: #007ce2;
 }
 
 /* Loading Indicator */
@@ -1536,17 +1536,17 @@ export default {
 }
 
 .review-btn {
-  background-color: #4caf50;
+  background-color: #4299e1;
   color: white;
 }
 
 .review-btn:hover:not(:disabled) {
-  background-color: #3d8b40;
+  background-color: #007ce2;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
 }
 
 .review-btn:disabled {
-  background-color: #a5d6a7;
+  background-color: #82b1d7;
   color: white;
   opacity: 0.9;
   cursor: not-allowed;
@@ -1600,20 +1600,20 @@ export default {
 
 .tab-btn:hover {
   background-color: #f5f5f5;
-  color: #4caf50;
+  color: #007ce2;
 }
 
 .tab-btn.active-tab {
-  color: #4caf50;
+  color: #007ce2;
   background-color: #f9f9f9;
-  border-bottom: 3px solid #4caf50;
+  border-bottom: 3px solid #007ce2;
 }
 
 .tab-badge {
   position: absolute;
   top: 5px;
   right: 5px;
-  background-color: #4caf50;
+  background-color: #4299e1;
   color: white;
   border-radius: 50%;
   padding: 2px 6px;

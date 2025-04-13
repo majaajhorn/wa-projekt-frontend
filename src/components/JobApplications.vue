@@ -333,7 +333,7 @@
   }
   
   .back-link a {
-    color: #4CAF50;
+    color: #4299e1;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
@@ -369,7 +369,7 @@
   
   .filter-btn.active {
     background-color: #e9ecef;
-    color: #4CAF50;
+    color: #4299e1;
     font-weight: 500;
   }
   
@@ -508,7 +508,7 @@
   .resume-link {
     display: inline-flex;
     align-items: center;
-    color: #4CAF50;
+    color: #4299e1;
     font-size: 14px;
     text-decoration: none;
   }
@@ -535,13 +535,13 @@
   }
   
   .action-btn.primary {
-    background-color: #4CAF50;
+    background-color: #4299e1;
     color: white;
     border: none;
   }
   
   .action-btn.primary:hover {
-    background-color: #45a049;
+    background-color: #007ce2;
   }
   
   .action-btn:not(.primary):hover {
@@ -627,7 +627,7 @@
   
   .primary-btn {
     padding: 8px 15px;
-    background-color: #4CAF50;
+    background-color: #4299e1;
     color: white;
     border: none;
     border-radius: 4px;

@@ -19,13 +19,13 @@
     </nav>
   </template>
   
-  <script>
+<script>
   export default {
     name: 'PublicNavBar'
   };
-  </script>
+</script>
   
-  <style scoped>
+<style scoped>
   .navbar {
     display: flex;
     justify-content: space-between;

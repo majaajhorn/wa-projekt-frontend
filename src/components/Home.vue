@@ -24,26 +24,6 @@
           <img src="../assets/4108044.jpg" alt="Care Illustration" class="hero-image">
         </div>
       </div>
-
-      <div class="features-section">
-        <div class="feature-card">
-          <div class="feature-icon">👨‍⚕️</div>
-          <h3>Qualified Carers</h3>
-          <p>All our carers are vetted and have relevant qualifications and experience.</p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon">🏠</div>
-          <h3>In-Home Support</h3>
-          <p>Get the care you need in the comfort of your own home.</p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon">❤️</div>
-          <h3>Compassionate Care</h3>
-          <p>Our carers provide not just assistance but also companionship.</p>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -160,46 +140,6 @@ html, body {
   max-width: 100%;
   height: auto;
   border-radius: 8px;
-  /* Removed box-shadow */
-}
-
-.features-section {
-  display: flex;
-  justify-content: space-between;
-  margin: 60px 0;
-  gap: 30px;
-}
-
-.feature-card {
-  flex: 1;
-  padding: 30px;
-  background-color: #ffffff;
-  border: 1px solid #f0f0f0;
-  border-radius: 10px;
-  text-align: center;
-  transition: transform 0.3s ease;
-  /* Removed box-shadow on hover */
-}
-
-.feature-card:hover {
-  transform: translateY(-5px);
-  /* No shadow on hover */
-}
-
-.feature-icon {
-  font-size: 3rem;
-  margin-bottom: 15px;
-}
-
-.feature-card h3 {
-  font-size: 1.3rem;
-  color: #333;
-  margin-bottom: 10px;
-}
-
-.feature-card p {
-  color: #666;
-  line-height: 1.5;
 }
 
 @media (max-width: 768px) {
@@ -213,10 +153,6 @@ html, body {
   
   .subtitle {
     font-size: 1.5rem;
-  }
-  
-  .features-section {
-    flex-direction: column;
   }
 }
 </style>

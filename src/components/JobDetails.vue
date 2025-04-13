@@ -369,7 +369,7 @@ export default {
 };
 </script>
 
-  <style scoped>
+<style scoped>
   .job-details-container {
     max-width: 800px;
     margin: 0 auto;
@@ -389,7 +389,7 @@ export default {
   }
   
   .back-link a {
-    color: #4CAF50;
+    color: #4299e1;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
@@ -410,7 +410,7 @@ export default {
     display: inline-block;
     margin-top: 15px;
     padding: 10px 20px;
-    background-color: #4CAF50;
+    background-color: #4299e1;
     color: white;
     border-radius: 4px;
     text-decoration: none;

@@ -4,7 +4,7 @@ import axios from 'axios';
 const apiClient = axios.create({
     baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
     headers: {
-        'Content-Type': 'application/json', // Default Content-Type for JSON requests
+        'Content-Type': 'application/json', 
     },
 });
 
@@ -17,7 +17,7 @@ apiClient.interceptors.request.use(
             config.headers.Authorization = `Bearer ${token}`;
         }
         
-        // Example: Log outgoing requests (optional)
+        // Log outgoing requests 
         console.log(`Sending ${config.method} request to: ${config.baseURL}${config.url}`);
         
         return config;

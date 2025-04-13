@@ -539,7 +539,7 @@ export default {
 .stat-number {
   font-size: 32px;
   font-weight: 700;
-  color: #4CAF50;
+  color: #4299e1;
   margin: 0;
 }
 
@@ -564,12 +564,12 @@ export default {
 }
 
 .action-btn.primary {
-  background-color: #4CAF50;
+  background-color: #4299e1;
   color: white;
 }
 
 .action-btn.primary:hover {
-  background-color: #45a049;
+  background-color: #007ce2;
 }
 
 .action-btn:not(.primary) {
@@ -629,7 +629,7 @@ export default {
 
 .filter-btn.active {
   background-color: #e9ecef;
-  color: #4CAF50;
+  color: #4299e1;
   font-weight: 500;
 }
 
@@ -677,7 +677,7 @@ export default {
 
 .application-status.interviewing {
   background-color: #e3f2fd;
-  color: #0d47a1;
+  color: #4299e1;
 }
 
 .application-status.rejected {
@@ -733,14 +733,14 @@ export default {
   border: none;
   padding: 0;
   font-size: 14px;
-  color: #4CAF50;
+  color: #4299e1;
   cursor: pointer;
   transition: color 0.2s;
   text-decoration: none;
 }
 
 .action-link:hover {
-  color: #45a049;
+  color: #007ce2;
   text-decoration: underline;
 }
 
@@ -766,7 +766,7 @@ export default {
 
 .primary-btn {
   padding: 10px 20px;
-  background-color: #4CAF50;
+  background-color: #4299e1;
   color: white;
   border: none;
   border-radius: 25px;
@@ -778,7 +778,7 @@ export default {
 }
 
 .primary-btn:hover {
-  background-color: #45a049;
+  background-color: #007ce2;
 }
 
 /* Loading Indicator */

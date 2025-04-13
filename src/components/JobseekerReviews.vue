@@ -13,7 +13,7 @@
     </div>
   </template>
   
-  <script>
+<script>
   import { ref, computed } from 'vue';
   import ReviewForm from './ReviewForm.vue';
   import ReviewList from './ReviewList.vue';
@@ -68,7 +68,7 @@
   };
   </script>
   
-  <style scoped>
+<style scoped>
   .jobseeker-reviews-section {
     margin: 30px 0;
   }
