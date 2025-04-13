@@ -1,34 +1,45 @@
-# Next thing to do:
+# CareMatch
 
-## MY PROFILE ##
-- ~~napraviti da se vidi ime i prezime (dohvatiti iz baze)~~
-- ~~email (opcija da se promijeni email - mijenjaj i u bazi čim se izmjeni)~~
-- ~~password (mora biti mogućnost da se može sakriti i opcija da se promijeni password - također mijenjaj i bazu)~~
-- ~~gender (odabir spola)~~
-- ~~english language level - dropdown~~
-- ~~care qualification - dropdown~~
-- location (korisnik mora unijeti svoju lokaciju) --> ovo moramo poboljšati da korisnik unese lokaciju pomoću maps(api neki)
-- ~~driving licence (dropdown)~~
-- ~~live-in experience (dropdown)~~
-- ~~general care experience (dropdown)~~
-- ~~profile picture (saveat možda kao string u bazu?)~~
-- ~~napraviti gumb: edit profile koji će nuditi sve opcije navedene gore~~
-- napraviti rating (ali to kad ga zaposlenici mogu rejtati pa da se prikaže prosjek ocjena) -> otom potom, ne sad
+## Fakultet informatike u Puli:
+https://fipu.unipu.hr/
 
-~~Ovo sve mora korisnik MORATI unijeti u svoj profil. To se sve mora spremati u bazu pod tim korisnikom (određenim), svaki korisnik ima svoje podatke.~~
+## Kolegij:
+Web aplikacije
 
-## LOGIN ## 
-- forgot password option (možda da mu se reset posalje na email?)
+## Mentor:
+doc. dr. sc. Nikola Tanković
+ntankovic.unipu.hr
 
-## MY PROFILE AS AN EMPLOYER ##
-- ~~full name, email, location, gender~~
+## Funkcionalnosti
 
-  ### Post a job ###
-  - ~~title, salary, employment type, (fulltime/parttime), location, job description~~
-  - ~~apply button (save)~~
-  - kad se sejva, prikazuje se na jobsearch kartici automatski --> ne radi, popraviti
-  - ~~gumb "view applications", "edit", to omogućiti da radi~~
+### Korisnik (njegovatelj):
+•	Registracija i prijava u sustav
+•	Upravljanje profilom (ažuriranje podataka, postavljanje fotografije)
+•	Pretraživanje poslova prema kriterijima
+•	Spremanje zanimljivih poslova, brisanje istih
+•	Prijava na poslove
+•	Pregled statusa prijave
 
+### Korisnik (poslodavac):
+•	Registracija i prijava u sustav
+•	Upravljanje profilom
+•	Objava novih poslova
+•	Pregled prijava za poslove
+•	Ažuriranje statusa prijava
+•	Brisanje/uređivanje objavljenih poslova
+•	Pretraživanje kandidata
+•	Ocjenjivanje njegovatelja
 
-Napraviti chat između carera i employera
-Kod jobseekera srediti da se pojavljuju poslovi na browse jobs, dashboard totalno srediti
+## Prijava
+
+### Poslodavac (Employer):
+martha123@gmail.com
+martha123
+
+### Njegovatelj (Jobseeker):
+pero123@gmail.com  
+pero123
+
+## Javni link: https://carematch.vercel.app/
+
+## Youtube link: https://www.youtube.com/watch?v=2w8AAd7tS_8
